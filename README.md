@@ -66,6 +66,7 @@ ip r del default dev eth0
 ## DHCP server and WiFi Access Point
 
 - https://www.tecmint.com/setup-a-dns-dhcp-server-using-dnsmasq-on-centos-rhel/
+- https://thekelleys.org.uk/dnsmasq/docs/dnsmasq-man.html
 
 ```
 sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
@@ -75,6 +76,7 @@ sudo vi /etc/dnsmasq.conf
 ```
 interface=br0
   dhcp-range=192.168.200.101,192.168.200.130,255.255.255.0,24h
+  dhcp-host=14:eb:b6:b4:d1:49,192.168.200.5
 ```
 
 `sudo vi /etc/hostapd/hostapd.conf`
@@ -140,3 +142,12 @@ run commands:
 sudo brctl addbr br0
 sudo brctl addif br0 eth0
 ```
+
+## AWS Route53 dynamic DNS
+
+- https://tynick.com/blog/03-16-2020/pynamicdns-dynamic-dns-with-raspberry-pi-python-and-aws/
+
+# Camera access
+
+- https://github.com/markszabo/tapo-c200-timelapse
+- https://www.tp-link.com/cz/support/faq/2680/
