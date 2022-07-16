@@ -6,8 +6,37 @@ https://thepi.io/how-to-use-your-raspberry-pi-as-a-wireless-access-point/
 ```
 sudo apt-get update
 sudo apt-get upgrade
-sudo apt-get install hostapd dnsmasq iptables
+sudo apt-get install hostapd dnsmasq iptables bridge-utils
 ```
+
+## 4G connection configuration
+
+- https://snapcraft.io/install/modem-manager/raspbian
+- https://ubuntu.com/core/docs/networkmanager/configure-cellular-connections
+
+
+```
+sudo apt install modemmanager
+sudo apt install network-manager
+```
+
+```
+mmcli -L
+```
+
+If modem is on device 0, enable it (change device number if different:
+
+```
+mmcli -m 0 -e
+```
+
+Configure connection:
+```
+nmcli c add type gsm ifname '*' con-name telekomsk apn internet
+nmcli r wwan on
+nmcli c modify telekomsk connection.autoconnect yes
+```
+
 
 ## Static IP addresses
 
@@ -16,12 +45,22 @@ sudo apt-get install hostapd dnsmasq iptables
 `sudo vi /etc/dhcpcd.conf`
 
 ```
-interface wlan0
+interface br0
 static ip_address=192.168.200.1/24
-interface eth0
-static ip_address=192.168.200.2/24
+
+#interface wlan0
+#static ip_address=192.168.200.1/24
+#interface eth0
+#static ip_address=192.168.200.2/24
+
 denyinterfaces eth0
 denyinterfaces wlan0
+denyinterfaces br0
+```
+
+If necessary, delete default route
+```
+ip r del default dev eth0
 ```
 
 ## DHCP server and WiFi Access Point
@@ -34,7 +73,7 @@ sudo vi /etc/dnsmasq.conf
 ```
 
 ```
-interface=wlan0
+interface=br0
   dhcp-range=192.168.200.101,192.168.200.130,255.255.255.0,24h
 ```
 
@@ -76,7 +115,7 @@ net.ipv4.ip_forward=1
 iptables rule
 
 ```
-sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+sudo iptables -t nat -A POSTROUTING -o ppp0 -j MASQUERADE
 sudo sh -c "iptables-save > /etc/iptables.ipv4.nat"
 ```
 
@@ -86,14 +125,18 @@ sudo sh -c "iptables-save > /etc/iptables.ipv4.nat"
 iptables-restore < /etc/iptables.ipv4.nat
 ```
 
-# 4G connection configuration
+## Bridge
 
-- https://snapcraft.io/install/modem-manager/raspbian
-- https://ubuntu.com/core/docs/networkmanager/configure-cellular-connections
+`sudo vi /etc/network/interfaces`
 
 ```
-sudo apt install snapd
-sudo reboot
-sudo snap install core
-sudo snap install modem-manager
+auto br0
+iface br0 inet manual
+bridge_ports eth0 wlan0
+```
+
+run commands:
+```
+sudo brctl addbr br0
+sudo brctl addif br0 eth0
 ```
