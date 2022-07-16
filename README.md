@@ -4,7 +4,9 @@
 https://thepi.io/how-to-use-your-raspberry-pi-as-a-wireless-access-point/
 
 ```
-sudo apt-get install hostapd dnsmasq
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install hostapd dnsmasq iptables
 ```
 
 ## Static IP addresses
@@ -22,7 +24,7 @@ denyinterfaces eth0
 denyinterfaces wlan0
 ```
 
-## DHCP server
+## DHCP server and WiFi Access Point
 
 - https://www.tecmint.com/setup-a-dns-dhcp-server-using-dnsmasq-on-centos-rhel/
 
@@ -31,7 +33,6 @@ sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
 sudo vi /etc/dnsmasq.conf
 ```
 
-## WiFi Access POint
 ```
 interface=wlan0
   dhcp-range=192.168.200.101,192.168.200.130,255.255.255.0,24h
@@ -87,8 +88,12 @@ iptables-restore < /etc/iptables.ipv4.nat
 
 # 4G connection configuration
 
-https://ubuntu.com/core/docs/networkmanager/configure-cellular-connections
+- https://snapcraft.io/install/modem-manager/raspbian
+- https://ubuntu.com/core/docs/networkmanager/configure-cellular-connections
 
 ```
-snap install modem-manager
+sudo apt install snapd
+sudo reboot
+sudo snap install core
+sudo snap install modem-manager
 ```
