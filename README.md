@@ -114,10 +114,16 @@ net.ipv4.ip_forward=1
 ```
 
 ## Firewall - iptables - NAT
+
+- https://serverfault.com/questions/140622/how-can-i-port-forward-with-iptables
+
 iptables rule
 
 ```
 sudo iptables -t nat -A POSTROUTING -o ppp0 -j MASQUERADE
+sudo iptables -t nat -A PREROUTING -i ppp0 -p tcp --dport 22 -j DNAT  --to-destination 192.168.200.1:22
+sudo iptables -A FORWARD -i ppp0 -o br0 -p tcp --dport 22 -j ACCEPT
+#sudo iptables -A FORWARD -i ppp0 -o br0 -p tcp --dport 22 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 sudo sh -c "iptables-save > /etc/iptables.ipv4.nat"
 ```
 
@@ -147,7 +153,72 @@ sudo brctl addif br0 eth0
 
 - https://tynick.com/blog/03-16-2020/pynamicdns-dynamic-dns-with-raspberry-pi-python-and-aws/
 
-# Camera access
+## SSH Access
+
+- https://www.everythingcli.org/ssh-tunnelling-for-fun-and-profit-autossh/
+
+`sudo vi /etc/systemd/system/autossh-cam-ssh-tunnel.service`
+
+```
+[Unit]
+Description=AutoSSH tunnel service Cam and SSH
+After=network.target
+
+[Service]
+Environment="AUTOSSH_GATETIME=0"
+ExecStart=/usr/bin/autossh -M 0 -N -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -R 0.0.0.0:10554:192.168.200.5:554 -R 0.0.0.0:10022:192.168.200.1:22 ubuntu@webcampi-cloud.dyndns.p4ulie.net -i /home/paulie/.ssh/webcampi_auto_ssh
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```
+sudo systemctl enable autossh-cam-ssh-tunnel.service
+sudo systemctl start autossh-cam-ssh-tunnel.service
+sudo systemctl status autossh-cam-ssh-tunnel.service
+```
+
+# Camera setup
+
+## Access
 
 - https://github.com/markszabo/tapo-c200-timelapse
 - https://www.tp-link.com/cz/support/faq/2680/
+
+`rtsp://<username>:<password>@<ip_address>:554/stream1`
+
+
+## Image capturing software
+
+- https://github.com/markszabo/tapo-c200-timelapse
+
+Dependencies:
+```
+sudo apt install libvlc-dev
+sudo pip3 install python-vlc
+```
+
+Copy example and edit configuration
+```
+cp timelapseconfig.py_example timelapseconfig.py
+```
+
+```
+*/10 * * * * /usr/bin/python3 /home/paulie/tapo-c200-timelapse/capture.py >> /tmp/timelapse.log
+```
+
+## FFMPEG
+
+- https://stackoverflow.com/questions/34904548/how-to-grab-a-single-image-from-rtsp-stream-using-ffmpeg
+- https://codingshiksha.com/tutorials/ffmpeg-command-to-take-screenshot-of-rtsp-stream-and-save-it-as-pngjpeg-image-file-in-command-line/
+- https://gist.github.com/westonruter/4508842
+- https://gist.github.com/alfonsrv/a788f8781fb1616e81a6b9cebf1ea2fa
+
+```
+ffmpeg -y -i rtsp://<username>:<password>@<ip_address>:554/stream1 -vframes 1 do.jpg
+```
+
+or alternately:
+```
+url='rtsp://<username>:<password>@<ip_address>:554/stream1' ffmpeg -i $url -r 1 -vsync 1 -qscale 1 -frames:v 1 -f image2 images_$(date +%F_%H-%M-%S).jpg
+```
