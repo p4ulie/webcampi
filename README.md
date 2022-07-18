@@ -294,6 +294,7 @@ RESULT=$?
 
 if [[ "${RESULT}" == "0" ]]; then
   /usr/bin/find "${DIR}" -name "latest_thumb*.jpg" -mmin +60 -delete
+fi
 
 exit 0
 
