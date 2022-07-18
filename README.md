@@ -334,9 +334,9 @@ exit 0
   </style>
 </head>
 
-<body>
+<body style="background-color:black;">
   <img src="latest.jpg">
-  <p>The code will reload after 15s.</p>
+  <p style="color:white">The code will reload after 15s.</p>
 </body>
 
 </html>
