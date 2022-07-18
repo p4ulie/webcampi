@@ -167,6 +167,8 @@ After=network.target
 [Service]
 Environment="AUTOSSH_GATETIME=0"
 ExecStart=/usr/bin/autossh -M 0 -N -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -R 0.0.0.0:10554:192.168.200.5:554 -R 0.0.0.0:10022:192.168.200.1:22 ubuntu@webcampi-cloud.dyndns.p4ulie.net -i /home/paulie/.ssh/webcampi_auto_ssh
+Restart=always
+RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
@@ -213,6 +215,7 @@ cp timelapseconfig.py_example timelapseconfig.py
 - https://codingshiksha.com/tutorials/ffmpeg-command-to-take-screenshot-of-rtsp-stream-and-save-it-as-pngjpeg-image-file-in-command-line/
 - https://gist.github.com/westonruter/4508842
 - https://gist.github.com/alfonsrv/a788f8781fb1616e81a6b9cebf1ea2fa
+- https://gist.github.com/tayvano/6e2d456a9897f55025e25035478a3a50#file-gistfile1-txt-L118
 
 ```
 ffmpeg -y -i rtsp://<username>:<password>@<ip_address>:554/stream1 -vframes 1 do.jpg
@@ -222,3 +225,80 @@ or alternately:
 ```
 url='rtsp://<username>:<password>@<ip_address>:554/stream1' ffmpeg -i $url -r 1 -vsync 1 -qscale 1 -frames:v 1 -f image2 images_$(date +%F_%H-%M-%S).jpg
 ```
+
+## Script
+
+`~/RTSP_grab/capture_cam.sh`
+
+```
+!/usr/bin/env bash
+
+export CAMERA_URL="rtsp://paulie:paulie002@192.168.200.5:554/stream1"
+export CAMERA_OUTPUT_PATH="/home/paulie/images"
+export CAMERA_OUTPUT_INTERVAL=30
+/usr/bin/python3 camera.py
+```
+
+
+### Service to run capture script
+
+`sudo vi /etc/systemd/system/capture_cam.service`
+
+```
+[Unit]
+Description=Capture images from IP camera
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/paulie/RTSP_grab
+User=paulie
+ExecStart=/usr/bin/bash /home/paulie/RTSP_grab/capture_cam.sh
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```
+sudo systemctl daemon-reload
+sudo systemctl enable capture_cam.service
+sudo systemctl start capture_cam.service
+sudo systemctl status capture_cam.service
+```
+
+### Sync to S3
+
+```
+#!/usr/bin/env bash
+
+export AWS_ACCESS_KEY_ID=<key_id>
+export AWS_SECRET_ACCESS_KEY=<secret_key>
+
+DIR="/home/paulie/images/thumb"
+S3_BUCKET="webcampi"
+
+PROCESS_COUNT=$(ps -ef | grep -v grep | grep -c s3_sync.sh)
+
+if [[ "${PROCESS_COUNT}" -gt 2 ]]; then
+  exit 0
+fi
+
+LATEST_FILE=$(ls -rtl ${DIR}/latest_thumb*.jpg | tail -1 | cut -d  " " -f 9)
+cp "${LATEST_FILE}" "${DIR}/latest.jpg"
+
+/usr/local/bin/aws s3 sync "${DIR}" s3://${S3_BUCKET} --exclude "*" --include "latest_thumb_*.jpg"
+
+RESULT=$?
+
+if [[ "${RESULT}" == "0" ]]; then
+  /usr/bin/find "${DIR}" -name "latest_thumb*.jpg" -mmin +60 -delete
+
+exit 0
+
+```
+
+### Directory listing on S3
+
+- https://github.com/nolanlawson/pretty-s3-index-html
