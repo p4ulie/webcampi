@@ -302,3 +302,31 @@ exit 0
 ### Directory listing on S3
 
 - https://github.com/nolanlawson/pretty-s3-index-html
+
+### Autorefresh latest image
+
+```html
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Page Title</title>
+  <meta http-equiv="refresh" content="15">
+  <style>
+    img {
+        max-width: 100%;
+        object-fit: contain;
+    }
+  </style>
+</head>
+
+<body>
+  <img src="latest.jpg">
+  <p>The code will reload after 15s.</p>
+</body>
+
+</html>
+```
+
+and set:
+`aws configure set s3.max_concurrent_requests 1`
