@@ -270,8 +270,17 @@ sudo systemctl status capture_cam.service
 
 ### Sync to S3
 
-```
+```shell
 #!/usr/bin/env bash
+
+PID=$$
+
+function cleanup {
+  rm -f /var/run/user/${UID}/s3_sync.pid
+}
+trap cleanup SIGINT
+trap cleanup SIGSTOP
+trap cleanup SIGTERM
 
 export AWS_ACCESS_KEY_ID=<key_id>
 export AWS_SECRET_ACCESS_KEY=<secret_key>
@@ -279,16 +288,17 @@ export AWS_SECRET_ACCESS_KEY=<secret_key>
 DIR="/home/paulie/images/thumb"
 S3_BUCKET="webcampi"
 
-PROCESS_COUNT=$(ps -ef | grep -v grep | grep -c s3_sync.sh)
-
-if [[ "${PROCESS_COUNT}" -gt 2 ]]; then
+if [[ -f /var/run/user/${UID}/s3_sync.pid ]]; then
+  echo "Another instance of s3_sync.sh already running, PID: $(cat /var/run/user/${UID}/s3_sync.pid)"
   exit 0
 fi
+
+echo "${PID}" > /var/run/user/${UID}/s3_sync.pid
 
 LATEST_FILE=$(ls -rtl ${DIR}/latest_thumb*.jpg | tail -1 | cut -d  " " -f 9)
 cp "${LATEST_FILE}" "${DIR}/latest.jpg"
 
-/usr/local/bin/aws s3 sync "${DIR}" s3://${S3_BUCKET} --exclude "*" --include "latest_thumb_*.jpg"
+/usr/local/bin/aws s3 sync "${DIR}" s3://${S3_BUCKET} --exclude "*" --include "latest_thumb_*.jpg" --include "latest.jpg"
 
 RESULT=$?
 
@@ -296,8 +306,11 @@ if [[ "${RESULT}" == "0" ]]; then
   /usr/bin/find "${DIR}" -name "latest_thumb*.jpg" -mmin +60 -delete
 fi
 
-exit 0
+cleanup
 
+echo "Exiting..."
+
+exit 0
 ```
 
 ### Directory listing on S3
@@ -331,3 +344,8 @@ exit 0
 
 and set:
 `aws configure set s3.max_concurrent_requests 1`
+
+set the cron `crontab -e` by adding the line:
+```
+* * * * * /home/paulie/s3_sync.sh >> /home/paulie/s3_sync.log 2>&1
+```
