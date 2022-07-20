@@ -166,7 +166,7 @@ After=network.target
 
 [Service]
 Environment="AUTOSSH_GATETIME=0"
-ExecStart=/usr/bin/autossh -M 0 -N -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -R 0.0.0.0:10554:192.168.200.5:554 -R 0.0.0.0:10022:192.168.200.1:22 ubuntu@webcampi-cloud.dyndns.p4ulie.net -i /home/paulie/.ssh/webcampi_auto_ssh
+ExecStart=/usr/bin/autossh -M 0 -N -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -R 0.0.0.0:10554:192.168.200.102:554 -R 0.0.0.0:10022:192.168.200.100:22 ubuntu@webcampi-cloud.dyndns.p4ulie.net -i /home/paulie/.ssh/webcampi_auto_ssh
 Restart=always
 RestartSec=5s
 
