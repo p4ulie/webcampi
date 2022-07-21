@@ -308,7 +308,7 @@ do
     cp "${LATEST_FILE}" "${DIR}/latest.jpg"
 
     echo "Uploading file ${LATEST_FILE}..."
-    /usr/local/bin/aws s3 cp "${DIR}/latest.jpg" s3://${S3_BUCKET}
+    /usr/local/bin/aws s3 cp "${DIR}/latest.jpg" s3://${S3_BUCKET} --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate
 
     PREVIOUS_LATEST_FILE="${LATEST_FILE}"
   else
@@ -404,7 +404,7 @@ exit 0
 <html>
 
 <head>
-  <title>Page Title</title>
+  <title>TabaCam</title>
   <meta http-equiv="refresh" content="15">
   <style>
     img {
