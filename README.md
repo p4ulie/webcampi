@@ -233,9 +233,9 @@ url='rtsp://<username>:<password>@<ip_address>:554/stream1' ffmpeg -i $url -r 1 
 ```
 !/usr/bin/env bash
 
-export CAMERA_URL="rtsp://paulie:paulie002@192.168.200.5:554/stream1"
+export CAMERA_URL="rtsp://paulie:paulie002@192.168.200.100:554/stream1"
 export CAMERA_OUTPUT_PATH="/home/paulie/images"
-export CAMERA_OUTPUT_INTERVAL=30
+export CAMERA_OUTPUT_INTERVAL=15
 /usr/bin/python3 camera.py
 ```
 
@@ -268,6 +268,89 @@ sudo systemctl start capture_cam.service
 sudo systemctl status capture_cam.service
 ```
 
+### Upload latest image to S3
+
+```shell
+#!/usr/bin/env bash
+
+DELAY=5
+DIR="/home/paulie/images"
+SUB_DIR="full"
+S3_BUCKET="webcampi"
+
+PID=$$
+
+function cleanup {
+  rm -f /var/run/user/${UID}/s3_upload_latest.pid
+}
+trap cleanup SIGINT
+trap cleanup SIGSTOP
+trap cleanup SIGTERM
+
+export AWS_ACCESS_KEY_ID=<key_id>
+export AWS_SECRET_ACCESS_KEY=<secret_key>
+
+if [[ -f /var/run/user/${UID}/s3_upload_latest.pid ]]; then
+  echo "Another instance of s3_upload_latest.sh already running, PID: $(cat /var/run/user/${UID}/s3_upload_latest.pid)"
+  exit 0
+fi
+
+echo "${PID}" > /var/run/user/${UID}/s3_upload_latest.pid
+
+PREVIOUS_LATEST_FILE=""
+
+while :
+do
+  LATEST_FILE=$(ls -rt ${DIR}/${SUB_DIR}/latest_full*.jpg | tail -1)
+
+  if [[ "${PREVIOUS_LATEST_FILE}" != "${LATEST_FILE}" ]]; then
+
+    cp "${LATEST_FILE}" "${DIR}/latest.jpg"
+
+    echo "Uploading file ${LATEST_FILE}..."
+    /usr/local/bin/aws s3 cp "${DIR}/latest.jpg" s3://${S3_BUCKET}
+
+    PREVIOUS_LATEST_FILE="${LATEST_FILE}"
+  else
+    echo "No newer file, skipping upload."
+  fi
+
+  sleep "${DELAY}"
+done
+
+cleanup
+
+exit 0
+```
+
+#### Service 
+
+`sudo vi /etc/systemd/system/s3_upload_latest.service`
+
+```
+[Unit]
+Description=Upload latest image in regular intervals
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/paulie/RTSP_grab
+User=paulie
+ExecStart=/usr/bin/bash /home/paulie/s3_upload_latest.sh
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```
+sudo systemctl daemon-reload
+sudo systemctl enable s3_upload_latest.service
+sudo systemctl start s3_upload_latest.service
+sudo systemctl status s3_upload_latest.service
+```
+
 ### Sync to S3
 
 ```shell
@@ -285,7 +368,7 @@ trap cleanup SIGTERM
 export AWS_ACCESS_KEY_ID=<key_id>
 export AWS_SECRET_ACCESS_KEY=<secret_key>
 
-DIR="/home/paulie/images/thumb"
+DIR="/home/paulie/images/full"
 S3_BUCKET="webcampi"
 
 if [[ -f /var/run/user/${UID}/s3_sync.pid ]]; then
@@ -295,20 +378,17 @@ fi
 
 echo "${PID}" > /var/run/user/${UID}/s3_sync.pid
 
-LATEST_FILE=$(ls -rtl ${DIR}/latest_thumb*.jpg | tail -1 | cut -d  " " -f 9)
-cp "${LATEST_FILE}" "${DIR}/latest.jpg"
+LATEST_FILE=$(ls -rtl ${DIR}/latest_full*.jpg | tail -1 | cut -d  " " -f 9)
 
-/usr/local/bin/aws s3 sync "${DIR}" s3://${S3_BUCKET} --exclude "*" --include "latest_thumb_*.jpg" --include "latest.jpg"
+/usr/local/bin/aws s3 sync "${DIR}" s3://${S3_BUCKET} --exclude "*" --include "latest_full_*.jpg"
 
 RESULT=$?
 
 if [[ "${RESULT}" == "0" ]]; then
-  /usr/bin/find "${DIR}" -name "latest_thumb*.jpg" -mmin +60 -delete
+  /usr/bin/find "${DIR}" -name "latest_full*.jpg" -mmin +60 -delete
 fi
 
 cleanup
-
-echo "Exiting..."
 
 exit 0
 ```
