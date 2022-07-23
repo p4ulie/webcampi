@@ -231,12 +231,17 @@ url='rtsp://<username>:<password>@<ip_address>:554/stream1' ffmpeg -i $url -r 1 
 `~/RTSP_grab/capture_cam.sh`
 
 ```
-!/usr/bin/env bash
+#!/usr/bin/env bash
 
-export CAMERA_URL="rtsp://paulie:paulie002@192.168.200.100:554/stream1"
+export CAMERA_URL="rtsp://<username>:<password>@192.168.200.102:554/stream1" 
 export CAMERA_OUTPUT_PATH="/home/paulie/images"
 export CAMERA_OUTPUT_INTERVAL=15
+export CAMERA_MIN_THRESHOLD=300
+export CAMERA_WIDTH=2160
+
 /usr/bin/python3 camera.py
+
+exit 0
 ```
 
 
@@ -273,9 +278,11 @@ sudo systemctl status capture_cam.service
 ```shell
 #!/usr/bin/env bash
 
-DELAY=5
+DELAY=1
 DIR="/home/paulie/images"
-SUB_DIR="full"
+SUB_DIR="thumb"
+PATTERN="latest_thumb_"
+
 S3_BUCKET="webcampi"
 
 PID=$$
@@ -301,7 +308,7 @@ PREVIOUS_LATEST_FILE=""
 
 while :
 do
-  LATEST_FILE=$(ls -rt ${DIR}/${SUB_DIR}/latest_full*.jpg | tail -1)
+  LATEST_FILE=$(ls -rt ${DIR}/${SUB_DIR}/${PATTERN}*.jpg | tail -1)
 
   if [[ "${PREVIOUS_LATEST_FILE}" != "${LATEST_FILE}" ]]; then
 
@@ -368,7 +375,10 @@ trap cleanup SIGTERM
 export AWS_ACCESS_KEY_ID=<key_id>
 export AWS_SECRET_ACCESS_KEY=<secret_key>
 
-DIR="/home/paulie/images/full"
+DIR="/home/paulie/images"
+SUB_DIR="thumb"
+PATTERN="latest_thumb_"
+
 S3_BUCKET="webcampi"
 
 if [[ -f /var/run/user/${UID}/s3_sync.pid ]]; then
@@ -378,15 +388,18 @@ fi
 
 echo "${PID}" > /var/run/user/${UID}/s3_sync.pid
 
-LATEST_FILE=$(ls -rtl ${DIR}/latest_full*.jpg | tail -1 | cut -d  " " -f 9)
+LATEST_FILE=$(ls -rtl ${DIR}/${SUB_DIR}/${PATTERN}*.jpg | tail -1 | cut -d  " " -f 9)
 
-/usr/local/bin/aws s3 sync "${DIR}" s3://${S3_BUCKET} --exclude "*" --include "latest_full_*.jpg"
+/usr/local/bin/aws s3 sync "${DIR}/${SUB_DIR}" s3://${S3_BUCKET} --exclude "*" --include "${PATTERN}*.jpg"
 
 RESULT=$?
 
 if [[ "${RESULT}" == "0" ]]; then
-  /usr/bin/find "${DIR}" -name "latest_full*.jpg" -mmin +60 -delete
+  /usr/bin/find "${DIR}/${SUB_DIR}" -name "${PATTERN}*.jpg" -mmin +1440 -delete
 fi
+
+# sync backlog images
+/usr/local/bin/aws s3 sync "${DIR}/backlog" s3://${S3_BUCKET} --exclude "*" --include "*.jpg"
 
 cleanup
 
