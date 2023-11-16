@@ -1,0 +1,14 @@
+[Unit]
+Description=Upload latest image in regular intervals
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/paulie/RTSP_grab
+User=paulie
+ExecStart=/usr/bin/bash /home/paulie/s3_upload_latest.sh
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

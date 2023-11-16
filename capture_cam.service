@@ -1,0 +1,14 @@
+[Unit]
+Description=Capture images from IP camera
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/paulie/RTSP_grab
+User=paulie
+ExecStart=/usr/bin/bash /home/paulie/RTSP_grab/capture_cam.sh
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

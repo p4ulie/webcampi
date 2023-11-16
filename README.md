@@ -228,43 +228,17 @@ url='rtsp://<username>:<password>@<ip_address>:554/stream1' ffmpeg -i $url -r 1 
 
 ## Script
 
-`~/RTSP_grab/capture_cam.sh`
+[RTSP_grab/camera.py](RTSP_grab/camera.py)
 
-```
-#!/usr/bin/env bash
-
-export CAMERA_URL="rtsp://<username>:<password>@192.168.200.102:554/stream1" 
-export CAMERA_OUTPUT_PATH="/home/paulie/images"
-export CAMERA_OUTPUT_INTERVAL=15
-export CAMERA_MIN_THRESHOLD=300
-export CAMERA_WIDTH=2160
-
-/usr/bin/python3 camera.py
-
-exit 0
-```
-
+[RTSP_grab/capture_cam.sh](RTSP_grab/capture_cam.sh)
 
 ### Service to run capture script
 
+[capture_cam.service](capture_cam.service)
+
+Create file and copy-paste content:
+
 `sudo vi /etc/systemd/system/capture_cam.service`
-
-```
-[Unit]
-Description=Capture images from IP camera
-After=network.target
-
-[Service]
-Type=simple
-WorkingDirectory=/home/paulie/RTSP_grab
-User=paulie
-ExecStart=/usr/bin/bash /home/paulie/RTSP_grab/capture_cam.sh
-Restart=always
-RestartSec=5s
-
-[Install]
-WantedBy=multi-user.target
-```
 
 ```
 sudo systemctl daemon-reload
@@ -275,81 +249,17 @@ sudo systemctl status capture_cam.service
 
 ### Upload latest image to S3
 
-```shell
-#!/usr/bin/env bash
 
-DELAY=1
-DIR="/home/paulie/images"
-SUB_DIR="thumb"
-PATTERN="latest_thumb_"
-
-S3_BUCKET="webcampi"
-
-PID=$$
-
-function cleanup {
-  rm -f /var/run/user/${UID}/s3_upload_latest.pid
-}
-trap cleanup SIGINT
-trap cleanup SIGSTOP
-trap cleanup SIGTERM
-
-export AWS_ACCESS_KEY_ID=<key_id>
-export AWS_SECRET_ACCESS_KEY=<secret_key>
-
-if [[ -f /var/run/user/${UID}/s3_upload_latest.pid ]]; then
-  echo "Another instance of s3_upload_latest.sh already running, PID: $(cat /var/run/user/${UID}/s3_upload_latest.pid)"
-  exit 0
-fi
-
-echo "${PID}" > /var/run/user/${UID}/s3_upload_latest.pid
-
-PREVIOUS_LATEST_FILE=""
-
-while :
-do
-  LATEST_FILE=$(ls -rt ${DIR}/${SUB_DIR}/${PATTERN}*.jpg | tail -1)
-
-  if [[ "${PREVIOUS_LATEST_FILE}" != "${LATEST_FILE}" ]]; then
-
-    cp "${LATEST_FILE}" "${DIR}/latest.jpg"
-
-    echo "Uploading file ${LATEST_FILE}..."
-    /usr/local/bin/aws s3 cp "${DIR}/latest.jpg" s3://${S3_BUCKET} --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate
-
-    PREVIOUS_LATEST_FILE="${LATEST_FILE}"
-  else
-    echo "No newer file, skipping upload."
-  fi
-
-  sleep "${DELAY}"
-done
-
-cleanup
-
-exit 0
-```
 
 #### Service 
 
+[s3_upload_latest.sh](s3_upload_latest.sh)
+
+[s3_upload_latest.service](s3_upload_latest.service)
+
+Create file and copy-paste content:
+
 `sudo vi /etc/systemd/system/s3_upload_latest.service`
-
-```
-[Unit]
-Description=Upload latest image in regular intervals
-After=network.target
-
-[Service]
-Type=simple
-WorkingDirectory=/home/paulie/RTSP_grab
-User=paulie
-ExecStart=/usr/bin/bash /home/paulie/s3_upload_latest.sh
-Restart=always
-RestartSec=5s
-
-[Install]
-WantedBy=multi-user.target
-```
 
 ```
 sudo systemctl daemon-reload
@@ -360,51 +270,7 @@ sudo systemctl status s3_upload_latest.service
 
 ### Sync to S3
 
-```shell
-#!/usr/bin/env bash
-
-PID=$$
-
-function cleanup {
-  rm -f /var/run/user/${UID}/s3_sync.pid
-}
-trap cleanup SIGINT
-trap cleanup SIGSTOP
-trap cleanup SIGTERM
-
-export AWS_ACCESS_KEY_ID=<key_id>
-export AWS_SECRET_ACCESS_KEY=<secret_key>
-
-DIR="/home/paulie/images"
-SUB_DIR="thumb"
-PATTERN="latest_thumb_"
-
-S3_BUCKET="webcampi"
-
-if [[ -f /var/run/user/${UID}/s3_sync.pid ]]; then
-  echo "Another instance of s3_sync.sh already running, PID: $(cat /var/run/user/${UID}/s3_sync.pid)"
-  exit 0
-fi
-
-echo "${PID}" > /var/run/user/${UID}/s3_sync.pid
-
-LATEST_FILE=$(ls -rtl ${DIR}/${SUB_DIR}/${PATTERN}*.jpg | tail -1 | cut -d  " " -f 9)
-
-/usr/local/bin/aws s3 sync "${DIR}/${SUB_DIR}" s3://${S3_BUCKET} --exclude "*" --include "${PATTERN}*.jpg"
-
-RESULT=$?
-
-if [[ "${RESULT}" == "0" ]]; then
-  /usr/bin/find "${DIR}/${SUB_DIR}" -name "${PATTERN}*.jpg" -mmin +1440 -delete
-fi
-
-# sync backlog images
-/usr/local/bin/aws s3 sync "${DIR}/backlog" s3://${S3_BUCKET} --exclude "*" --include "*.jpg"
-
-cleanup
-
-exit 0
-```
+[s3_sync.sh](s3_sync.sh)
 
 ### Directory listing on S3
 
