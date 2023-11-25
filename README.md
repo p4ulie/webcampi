@@ -250,8 +250,7 @@ sudo systemctl status capture_cam.service
 ### Upload latest image to S3
 
 
-
-#### Service 
+#### Service (optional - camera.py does the copy to latest.jpg after upload)
 
 [s3_upload_latest.sh](s3_upload_latest.sh)
 
@@ -268,7 +267,7 @@ sudo systemctl start s3_upload_latest.service
 sudo systemctl status s3_upload_latest.service
 ```
 
-### Sync to S3
+### Sync to S3 (optional)
 
 [s3_sync.sh](s3_sync.sh)
 

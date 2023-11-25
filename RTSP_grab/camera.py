@@ -51,6 +51,13 @@ def get_stream():
 def upload_image(file_name, bucket, remote_file_name):
     s3.meta.client.upload_file( file_name, bucket, remote_file_name)
 
+def update_latest_image(bucket, remote_file_name):
+    copy_source = {
+        'Bucket': bucket,
+        'Key': remote_file_name
+    }
+    s3.meta.client.copy(copy_source, bucket, 'latest.jpg')
+
 if __name__ == '__main__':
     print('Initializing stream...')
     vs = get_stream()
@@ -70,12 +77,26 @@ if __name__ == '__main__':
             last_static = datetime.now()
             last_static_string = last_static.strftime("%Y-%m-%d_%H-%M-%S")
             last_static_string_date = last_static.strftime("%Y-%m-%d")
+            last_static_string_year = last_static.strftime("%Y")
+            last_static_string_month = last_static.strftime("%m")
+            last_static_string_day = last_static.strftime("%d")
             last_static_string_hour = last_static.strftime("%H")
+
+            remote_file_name = last_static_string_year+"/"+last_static_string_month+"/"+last_static_string_day+"/"+last_static_string_hour+"/"+last_static_string+'.jpg'
+
             smol_frame = imutils.resize(full_frame, width=CAMERA_WIDTH)
             #cv2.imwrite(os.path.join(OUTPUT_PATH, last_static_string+'.jpg'), full_frame)
             cv2.imwrite(os.path.join(OUTPUT_PATH, last_static_string+'.jpg'), smol_frame)
-            upload_image(os.path.join(OUTPUT_PATH, last_static_string+'.jpg'), BUCKET_NAME, last_static_string_date+"/"+last_static_string_hour+"/"+last_static_string+'.jpg')
-            upload_image(os.path.join(OUTPUT_PATH, last_static_string+'.jpg'), BUCKET_NAME, 'latest.jpg')
+
+            upload_image(
+                os.path.join(OUTPUT_PATH, last_static_string+'.jpg'),
+                BUCKET_NAME,
+                remote_file_name
+            )
+            update_latest_image(
+                BUCKET_NAME,
+                remote_file_name
+            )
 
         # show the frame and record if the user presses a key
         if args.window:
@@ -89,4 +110,3 @@ if __name__ == '__main__':
     # cleanup the camera and close any open windows
     vs.release()  # vs.stop()
     cv2.destroyAllWindows()
-
