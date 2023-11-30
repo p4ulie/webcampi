@@ -4,7 +4,7 @@ DIR=${HOME}/images
 YEAR=2023
 MONTH=11
 
-for day in {11..25};
+for day in {26..29};
 do
   for hour in {00..23};
   do
