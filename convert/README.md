@@ -3,21 +3,17 @@
 ## Intial setup of VM
 
 ```shell
-sudo apt install awscli
+sudo apt install -y awscli  ffmpeg x265
 aws configure
 aws s3 ls
 mkdir images
-sudo apt install ffmpeg x265
 ```
 
 ## Sync directories
 
 ```shell
-cd
 mkdir -p "${HOME}/images/2023/11"
-cd "${HOME}/images/2023/11"
-for day in {26..29}; do aws s3 sync s3://webcampi/2023/11/${day} ${day}; done
-
+for day in {26..29}; do aws s3 sync s3://webcampi/2023/11/${day} "${HOME}/images/2023/11/${day}"; done
 ```
 
 ## Run convert script
@@ -30,7 +26,7 @@ time bash convert.sh
 ## Upload videos
 
 ```shell
-aws s3 sync --exclude '*' --include '*.mp4' . s3://webcampi/video
+aws s3 sync --exclude '*' --include '*.mp4' "${HOME}" s3://webcampi/video
 ```
 
 ## Download and encoding performance
@@ -65,4 +61,40 @@ real    7m27.432s
 user    70m40.063s
 sys     0m13.900s
 
+```
+
+### t3.xlarge instance
+
+```shell
+time aws s3 sync s3://webcampi/2023/11/30 images/2023/11/30
+
+...
+...
+...
+
+real    1m56.583s
+user    1m9.559s
+sys     0m26.152s
+```
+
+```shell
+time ffmpeg -r 30 -pattern_type glob -i "images/2023/11/30/*/*.jpg" -c:v libx265 -pix_fmt yuv420p 2023-11-30.mp4
+
+...
+...
+...
+
+encoded 8095 frames in 1616.80s (5.01 fps), 7375.54 kb/s, Avg QP:33.36
+
+real    26m56.959s
+user    101m51.001s
+sys     0m8.509s
+```
+
+### Desktop computer 
+
+1 hour converted
+
+```shell
+encoded 311 frames in 21.17s (14.69 fps), 19708.29 kb/s, Avg QP:34.41
 ```
