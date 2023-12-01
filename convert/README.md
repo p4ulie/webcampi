@@ -33,8 +33,6 @@ aws s3 sync --exclude '*' --include '*.mp4' "${HOME}" s3://webcampi/video
 
 (about 5.2G per day, about 8153 files, 400kB-1MB of file size, 2304x1296)
 
-> Need to check if CPU only was used
-
 ### vt1.3xlarge instance
 
 ```shell
@@ -45,6 +43,8 @@ user    0m39.036s
 sys     0m13.781s
 ```
 
+#### SW enconding using standard build of ffmpeg 
+
 ```shell
 time ffmpeg -r 30 -pattern_type glob -i "images/2023/11/29/*/*.jpg" -c:v libx265 -pix_fmt yuv420p 2023-11-29.mp4
 
@@ -53,8 +53,13 @@ encoded 8153 frames in 447.31s (18.23 fps), 5587.99 kb/s, Avg QP:33.33
 real    7m27.432s
 user    70m40.063s
 sys     0m13.900s
-
 ```
+
+#### HW enconding using AMD-Xilinx Alveo U30 media accelerator
+
+https://www.hackster.io/bhashimi/introduction-to-alveo-u30-video-transcoding-000ea1
+https://xilinx.github.io/video-sdk/v1.5/getting_started_on_prem.html
+https://xilinx.github.io/video-sdk/v1.5/index.html
 
 ### t3.xlarge instance
 
@@ -89,6 +94,10 @@ sys     0m8.509s
 
 ### Desktop computer 
 
+> 1 hour of video converted only, instead of 24 hours
+
+#### SW enconding using standard build of ffmpeg
+
 ```
 Model name:                         AMD Ryzen 7 3700X 8-Core Processor
 CPU family:                         23
@@ -101,11 +110,30 @@ Frequency boost:                    enabled
 CPU max MHz:                        4426,1709
 CPU min MHz:                        2200,0000
 BogoMIPS:                           7199.72
-
 ```
-
-1 hour of video converted only, instead of 24 hours
 
 ```shell
-encoded 311 frames in 21.17s (14.69 fps), 19708.29 kb/s, Avg QP:34.41
+time ffmpeg -r 30 -pattern_type glob -i "images/2023/11/30/*/*.jpg" -c:v libx265 -pix_fmt yuv420p 2023-11-30.mp4
+
+encoded 311 frames in 19.84s (15.67 fps), 19708.29 kb/s, Avg QP:34.41
+
+260,29s user
+1,09s system
+723% cpu
+36,130 total
 ```
+
+#### AMD Radeon 5700XT acceleration
+
+```shell
+time ffmpeg -hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format vaapi -r 30 -pattern_type glob -i "images/2023/11/30/*/*.jpg" -c:v hevc_vaapi -b:v 19M -pix_fmt yuv420p 2023-11-30_hw.mp4
+
+frame=  311 fps= 58 q=-0.0 Lsize=  136068kB time=00:00:10.33 bitrate=107870.6kbits/s speed=1.92x    
+
+1,91s user
+0,40s system
+42% cpu
+5,488 total
+```
+
+15.67fps vs 58 fps = about 4x faste GPU enconding
