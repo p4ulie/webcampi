@@ -16,7 +16,7 @@ mkdir images
 
 ```shell
 mkdir -p "${HOME}/images/2023/11"
-for day in {26..29}; do aws s3 sync s3://webcampi/2023/11/${day} "${HOME}/images/2023/11/${day}"; done
+for day in {26..29}; do aws s3 sync s3://<bucket>/2023/11/${day} "${HOME}/images/2023/11/${day}"; done
 ```
 
 ## Run convert script
@@ -29,7 +29,7 @@ time bash convert.sh
 ## Upload videos
 
 ```shell
-aws s3 sync --exclude '*' --include '*.mp4' "${HOME}" s3://webcampi/video
+aws s3 sync --exclude '*' --include '*.mp4' "${HOME}" s3://<bucket>/video
 ```
 
 ## Download and encoding performance
@@ -39,7 +39,7 @@ aws s3 sync --exclude '*' --include '*.mp4' "${HOME}" s3://webcampi/video
 ### vt1.3xlarge instance
 
 ```shell
-time aws s3 sync s3://webcampi/2023/11/29 images/2023/11/29
+time aws s3 sync s3://<bucket>/2023/11/29 images/2023/11/29
 
 real    1m32.695s
 user    0m39.036s
@@ -129,7 +129,7 @@ BogoMIPS:                           4999.99
 ```
 
 ```shell
-time aws s3 sync s3://webcampi/2023/11/30 images/2023/11/30
+time aws s3 sync s3://<bucket>/2023/11/30 images/2023/11/30
 
 real    1m56.583s
 user    1m9.559s
