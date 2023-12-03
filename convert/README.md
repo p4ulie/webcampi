@@ -73,7 +73,46 @@ video:563909kB audio:0kB subtitle:0kB other streams:0kB global headers:0kB muxin
 real    3m1.237s
 user    2m38.043s
 sys     0m3.624s
+```
 
+#### Specify number of cores to use (2 available)
+
+```shell
+time ffmpeg -r 30 -pattern_type glob -i "images/2023/11/29/*/*.jpg" -cores 2 -c:v mpsoc_vcu_hevc -b:v 17000K 2023-11-29_hw.mp4
+
+rame= 8153 fps= 47 q=-0.0 Lsize=  564003kB time=00:04:31.70 bitrate=17005.2kbits/s speed=1.56x
+video:563920kB audio:0kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: 0.014736%
+
+real    2m56.852s
+user    2m37.109s
+sys     0m3.587s
+
+```
+
+#### Test transcode mp4 -> mp4 (JPG decoding seems to be software only), 1 core
+
+```shell
+time ffmpeg -r 30 -c:v mpsoc_vcu_hevc  -i 2023-11-29.mp4 -cores 1 -c:v mpsoc_vcu_hevc -b:v 17000K 2023-11-29_hw.mp4
+
+frame= 8153 fps= 67 q=-0.0 Lsize=  563943kB time=00:04:31.70 bitrate=17003.4kbits/s speed=2.22x
+video:563860kB audio:0kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: 0.014747%
+
+real    2m58.163s
+user    0m2.243s
+sys     0m2.495s
+```
+
+#### Test transcode mp4 -> mp4 (JPG decoding seems to be software only), 2 cores
+
+```shell
+time ffmpeg -r 30 -c:v mpsoc_vcu_hevc  -i 2023-11-29.mp4 -cores 1 -c:v mpsoc_vcu_hevc -b:v 17000K 2023-11-29_hw.mp4
+
+frame= 8153 fps=124 q=-0.0 Lsize=  563977kB time=00:04:31.70 bitrate=17004.4kbits/s speed=4.15x
+video:563894kB audio:0kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: 0.014717%
+
+real    1m7.780s
+user    0m2.249s
+sys     0m2.352s
 ```
 
 ### t3.xlarge instance
