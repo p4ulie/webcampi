@@ -3,7 +3,10 @@
 ## Intial setup of VM
 
 ```shell
-sudo apt install -y awscli  ffmpeg x265
+sudo apt install -y ffmpeg x265 git unzip python
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
 aws configure
 aws s3 ls
 mkdir images
@@ -60,6 +63,18 @@ sys     0m13.900s
 https://www.hackster.io/bhashimi/introduction-to-alveo-u30-video-transcoding-000ea1
 https://xilinx.github.io/video-sdk/v1.5/getting_started_on_prem.html
 https://xilinx.github.io/video-sdk/v1.5/index.html
+
+```shell
+time ffmpeg -r 30 -pattern_type glob -i "images/2023/11/29/*/*.jpg" -c:v mpsoc_vcu_hevc -b:v 17000K 2023-11-29.mp4
+
+frame= 8153 fps= 46 q=-0.0 Lsize=  563992kB time=00:04:31.70 bitrate=17004.9kbits/s speed=1.55x
+video:563909kB audio:0kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: 0.014738%
+
+real    3m1.237s
+user    2m38.043s
+sys     0m3.624s
+
+```
 
 ### t3.xlarge instance
 
