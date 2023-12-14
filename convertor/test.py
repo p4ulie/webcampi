@@ -2,6 +2,10 @@ import subprocess
 import boto3
 import os
 import tempfile
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 def download_from_s3(bucket_name, s3_directory, local_directory):
     s3 = boto3.client('s3')
@@ -48,14 +52,17 @@ def lambda_handler(event, context):
     for obj in bucket.objects.filter(Prefix=s3_source_directory):
         if obj.key != s3_source_directory:
             subdirectory = obj.key[len(s3_source_directory):].split('/')[0]
+            logger.info(f'Download image {obj.key}')
             download_from_s3(s3_bucket_name, obj.key, os.path.join(image_directory))
 
     # Change directory to access the source files
     os.chdir(image_directory)
 
+    logger.info('Encode the video')
     # Use FFmpeg to create a video from images in the directory
     subprocess.run(['ffmpeg', '-framerate', '30', '-pattern_type', 'glob', '-i', '*.jpg', '-c:v', 'libx265', '-pix_fmt', 'yuv420p', os.path.join(output_directory, output_file_name)], check=True)
 
+    logger.info('Upload the video {os.path.join(output_directory, output_file_name)}')
     # Upload the resulting video to S3
     upload_to_s3(
         bucket_name=s3_bucket_name,
