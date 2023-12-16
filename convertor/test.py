@@ -1,9 +1,7 @@
 import subprocess
 import boto3
 import os
-import tempfile
 import logging
-import json
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -24,7 +22,7 @@ def upload_to_s3(bucket_name, local_file_path, s3_directory, s3_file_name):
     s3.upload_file(local_file_path, bucket_name, f"{s3_directory}/{s3_file_name}")
 
 def lambda_handler(event, context):
-    s3_parameters = json.loads(event)['s3_parameters']
+    s3_parameters = event['s3_parameters']
 
     # Replace with your bucket name and source/destination directories
     if 'bucket_name' in s3_parameters.keys():
@@ -96,4 +94,4 @@ if __name__ == "__main__":
             "bucket_directory_day": "01"
         }
     }
-    lambda_handler(json.dumps(event), "")
+    lambda_handler(event, "")
