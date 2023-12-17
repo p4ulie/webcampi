@@ -67,7 +67,7 @@ def lambda_handler(event, context):
 
     logger.info('Encode the video')
     # Use FFmpeg to create a video from images in the directory
-    subprocess.run(['ffmpeg', '-y', '-framerate', '30', '-pattern_type', 'glob', '-i', '*.jpg', '-c:v', 'libx265', '-pix_fmt', 'yuv420p', os.path.join(output_directory, output_file_name)], check=True)
+    subprocess.run(['/opt/ffmpeg/ffmpeg', '-y', '-framerate', '30', '-pattern_type', 'glob', '-i', '*.jpg', '-c:v', 'libx265', '-pix_fmt', 'yuv420p', os.path.join(output_directory, output_file_name)], check=True)
 
     logger.info('Upload the video {os.path.join(output_directory, output_file_name)}')
     # Upload the resulting video to S3
