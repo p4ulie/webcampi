@@ -36,8 +36,9 @@ def lambda_handler(event, context):
     # s3_date_month = event.get('sourceParameters',{}).get('month','n/a')
     s3_date_day = s3_parameters['bucket_directory_day']
     # s3_date_day = event.get('sourceParameters',{}).get('day','n/a')
+    s3_date_hour = s3_parameters['bucket_directory_hour']
 
-    s3_source_directory = f'{s3_date_year}/{s3_date_month}/{s3_date_day}/'
+    s3_source_directory = f'{s3_date_year}/{s3_date_month}/{s3_date_day}/{s3_date_hour}/'
     if 'bucket_name' in s3_parameters.keys():
         s3_destination_directory = s3_parameters['bucket_directory_destination']
     else:
@@ -45,7 +46,7 @@ def lambda_handler(event, context):
 
     image_directory = '/tmp/images'
     output_directory = '/tmp/output'
-    output_file_name = f'{s3_date_year}_{s3_date_month}_{s3_date_day}_test.mp4'  # Name for the output video file
+    output_file_name = f'{s3_date_year}_{s3_date_month}_{s3_date_day}_{s3_date_hour}_test.mp4'  # Name for the output video file
 
     # Ensure the local directories exist
     os.makedirs(image_directory, exist_ok=True)
@@ -58,7 +59,6 @@ def lambda_handler(event, context):
 
     for obj in bucket.objects.filter(Prefix=s3_source_directory):
         if obj.key != s3_source_directory:
-            subdirectory = obj.key[len(s3_source_directory):].split('/')[0]
             logger.info(f'Download image {obj.key}')
             download_from_s3(s3_bucket_name, obj.key, os.path.join(image_directory))
 
@@ -88,7 +88,8 @@ if __name__ == "__main__":
         "s3_parameters": {
             "bucket_directory_year": "2023",
             "bucket_directory_month": "12",
-            "bucket_directory_day": "01"
+            "bucket_directory_day": "01",
+            "bucket_directory_hour": "11"
         }
     }
     lambda_handler(event, "")
