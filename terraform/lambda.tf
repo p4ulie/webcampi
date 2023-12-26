@@ -28,6 +28,7 @@ resource "aws_lambda_function" "convert_image_to_video" {
   layers = [aws_lambda_layer_version.lambda_layer_ffmpeg.arn]
 
   memory_size = 1500
+  timeout = 900
 
   ephemeral_storage {
     size = 10240 # Min 512 MB and the Max 10240 MB
