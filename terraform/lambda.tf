@@ -19,13 +19,15 @@ resource "aws_lambda_function" "convert_image_to_video" {
   # path.module in the filename.
   filename      = "lambda/convert_image_to_video_payload.zip"
   function_name = "convert_image_to_video"
-  role          = aws_iam_role.convert_image_to_video.arn
+  role          = aws_iam_role.lambda_convert_image_to_video.arn
   handler       = "lambda_handler"
 
   source_code_hash = data.archive_file.convert_image_to_video.output_base64sha256
 
   runtime = "python3.12"
   layers = [aws_lambda_layer_version.lambda_layer_ffmpeg.arn]
+
+  memory_size = 1500
 
   ephemeral_storage {
     size = 10240 # Min 512 MB and the Max 10240 MB
