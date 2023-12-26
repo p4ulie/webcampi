@@ -62,3 +62,16 @@ Preparing these layers might involve different methods based on the source of FF
 
 Remember, packaging FFmpeg and x265 codec might increase the layer's size significantly, potentially affecting Lambda's cold start time and the overall performance. Consider optimizing the layer size and
 Lambda's execution environment accordingly.
+
+## Lambda test event
+
+```json
+{
+  "s3_parameters": {
+    "bucket_directory_year": "2023",
+    "bucket_directory_month": "12",
+    "bucket_directory_day": "01",
+    "bucket_directory_hour": "11"
+  }
+}
+```
