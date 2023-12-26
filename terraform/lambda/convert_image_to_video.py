@@ -39,7 +39,7 @@ def lambda_handler(event, context):
     s3_date_hour = s3_parameters['bucket_directory_hour']
 
     s3_source_directory = f'{s3_date_year}/{s3_date_month}/{s3_date_day}/{s3_date_hour}/'
-    if 'bucket_name' in s3_parameters.keys():
+    if 'bucket_directory_destination' in s3_parameters.keys():
         s3_destination_directory = s3_parameters['bucket_directory_destination']
     else:
         s3_destination_directory = 'video'
@@ -83,13 +83,13 @@ def lambda_handler(event, context):
         'body': 'Video transcoding complete.'
     }
 
-if __name__ == "__main__":
-    event = {
-        "s3_parameters": {
-            "bucket_directory_year": "2023",
-            "bucket_directory_month": "12",
-            "bucket_directory_day": "01",
-            "bucket_directory_hour": "11"
-        }
-    }
-    lambda_handler(event, "")
+# if __name__ == "__main__":
+#     event = {
+#         "s3_parameters": {
+#             "bucket_directory_year": "2023",
+#             "bucket_directory_month": "12",
+#             "bucket_directory_day": "01",
+#             "bucket_directory_hour": "11"
+#         }
+#     }
+#     lambda_handler(event, "")

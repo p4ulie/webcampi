@@ -20,7 +20,7 @@ resource "aws_lambda_function" "convert_image_to_video" {
   filename      = "lambda/convert_image_to_video_payload.zip"
   function_name = "convert_image_to_video"
   role          = aws_iam_role.lambda_convert_image_to_video.arn
-  handler       = "lambda_handler"
+  handler       = "convert_image_to_video.lambda_handler"
 
   source_code_hash = data.archive_file.convert_image_to_video.output_base64sha256
 
