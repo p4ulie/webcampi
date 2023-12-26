@@ -121,3 +121,31 @@ resource "aws_iam_role_policy_attachment" "lambda_convert_image_to_video_logs" {
 
   policy_arn = aws_iam_policy.lambda_logs.arn
 }
+
+data "aws_iam_policy_document" "lambda_invoke" {
+  statement {
+    sid = "S3InvokeLambda"
+
+    actions = [
+      "lambda:InvokeFunction",
+    ]
+
+    resources = ["arn:aws:lambda:*:${data.aws_caller_identity.current.account_id}:function:*"]
+  }
+}
+
+resource "aws_iam_policy" "lambda_invoke" {
+  name        = "lambda_invoke"
+  path        = "/"
+  description = ""
+
+  policy = data.aws_iam_policy_document.lambda_invoke.json
+
+  tags = var.aws_tags
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_invoke" {
+  role = aws_iam_role.lambda_convert_image_to_video.name
+
+  policy_arn = aws_iam_policy.lambda_invoke.arn
+}
