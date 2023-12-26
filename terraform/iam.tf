@@ -74,9 +74,8 @@ resource "aws_iam_role_policy_attachment" "convert_video_full_access" {
 }
 
 resource "aws_iam_role" "lambda_convert_image_to_video" {
-  name               = "convert_image_to_video"
+  name               = "lambda_convert_image_to_video"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
-
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_convert_image_to_video_s3_access" {
