@@ -30,7 +30,7 @@ data "aws_iam_policy_document" "video_bucket_full_access" {
       "s3:CreateJob"
     ]
 
-    resources = [ "*" ]
+    resources = ["*"]
   }
   statement {
     sid = "S3VideoBucketFullAccess"
@@ -57,8 +57,8 @@ resource "aws_iam_policy" "video_bucket_full_access" {
 }
 
 resource "aws_iam_role" "convert_video_full_access" {
-  name = "convert_instance_s3_access"
-  description = "Allows EC2 to access S3 on your behalf."
+  name               = "convert_instance_s3_access"
+  description        = "Allows EC2 to access S3 on your behalf."
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 
   tags = var.aws_tags
@@ -68,4 +68,9 @@ resource "aws_iam_role_policy_attachment" "convert_video_full_access" {
   role = aws_iam_role.convert_video_full_access.name
 
   policy_arn = aws_iam_policy.video_bucket_full_access.arn
+}
+
+resource "aws_iam_role" "convert_image_to_video" {
+  name               = "convert_image_to_video"
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }

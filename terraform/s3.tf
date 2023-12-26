@@ -85,19 +85,19 @@ data "aws_iam_policy_document" "video" {
     condition {
       test     = "StringEquals"
       variable = "aws:SourceAccount"
-      values = [ "${data.aws_caller_identity.current.account_id}" ]
+      values   = ["${data.aws_caller_identity.current.account_id}"]
     }
 
     condition {
       test     = "StringEquals"
       variable = "s3:x-amz-acl"
-      values = [ "bucket-owner-full-control" ]
+      values   = ["bucket-owner-full-control"]
     }
 
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
-      values = [ "arn:aws:logs:*:${data.aws_caller_identity.current.account_id}:*" ]
+      values   = ["arn:aws:logs:*:${data.aws_caller_identity.current.account_id}:*"]
     }
   }
 
@@ -120,13 +120,13 @@ data "aws_iam_policy_document" "video" {
     condition {
       test     = "StringEquals"
       variable = "aws:SourceAccount"
-      values = [ "${data.aws_caller_identity.current.account_id}" ]
+      values   = ["${data.aws_caller_identity.current.account_id}"]
     }
 
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
-      values = [ "arn:aws:logs:*:${data.aws_caller_identity.current.account_id}:*" ]
+      values   = ["arn:aws:logs:*:${data.aws_caller_identity.current.account_id}:*"]
     }
   }
 }
@@ -143,18 +143,18 @@ resource "aws_s3_bucket_website_configuration" "video" {
     suffix = "latest.html"
   }
 
-#  error_document {
-#    key = "error.html"
-#  }
+  #  error_document {
+  #    key = "error.html"
+  #  }
 
-#  routing_rule {
-#    condition {
-#      key_prefix_equals = "docs/"
-#    }
-#    redirect {
-#      replace_key_prefix_with = "documents/"
-#    }
-#  }
+  #  routing_rule {
+  #    condition {
+  #      key_prefix_equals = "docs/"
+  #    }
+  #    redirect {
+  #      replace_key_prefix_with = "documents/"
+  #    }
+  #  }
 }
 
 resource "aws_s3_bucket_versioning" "video" {
