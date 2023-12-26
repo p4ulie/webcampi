@@ -1,6 +1,6 @@
 resource "aws_s3_bucket" "video" {
   bucket = var.aws_bucket_video
-  tags = var.aws_tags
+  tags   = var.aws_tags
 }
 
 resource "aws_s3_bucket_ownership_controls" "video" {

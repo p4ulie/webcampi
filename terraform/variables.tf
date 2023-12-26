@@ -7,7 +7,9 @@ variable "aws_region" {
 variable "aws_tags" {
   type        = map(string)
   description = "Tags to add to all resources."
-  default     = {}
+  default     = {
+    "project" = "webcampi"
+  }
 }
 
 variable "aws_bucket_video" {
