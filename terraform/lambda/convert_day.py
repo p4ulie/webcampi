@@ -35,24 +35,27 @@ def lambda_handler(event, context):
     s3_resource = boto3.resource('s3')
     bucket = s3_resource.Bucket(s3_bucket_name)
 
+    hour_directory_list = []
     for obj in bucket.objects.filter(Prefix=s3_source_directory):
-        if obj.key != s3_source_directory:
-            logger.info(f'Invoking lambda function for {obj.key}')
-            event = {
-                "s3_parameters": {
-                    "bucket_directory_year": s3_date_year,
-                    "bucket_directory_month": s3_date_month,
-                    "bucket_directory_day": s3_date_day,
-                    "bucket_directory_hour": obj.key.split('/')[-1],
-                    "bucket_directory_destination": s3_destination_directory
-                }
+        if obj.key.split('/')[-2] not in hour_directory_list:
+            hour_directory_list.append(obj.key.split('/')[-2])
+
+    for hour_directory in hour_directory_list.sort():
+        event = {
+            "s3_parameters": {
+                "bucket_directory_year": s3_date_year,
+                "bucket_directory_month": s3_date_month,
+                "bucket_directory_day": s3_date_day,
+                "bucket_directory_hour": hour_directory,
+                "bucket_directory_destination": s3_destination_directory
             }
-            logger.info(f'Invoking lambda function {lambda_function_name} for {event}')
-            print(event)
-            # response = lambda_client.invoke(
-            #     FunctionName=lambda_function_name,
-            #     Payload=json.dumps(event),
-            # )
+        }
+        logger.info(f'Invoking lambda function {lambda_function_name} for {event}')
+        print(event)
+        # response = lambda_client.invoke(
+        #     FunctionName=lambda_function_name,
+        #     Payload=json.dumps(event),
+        # )
 
     return {
         'statusCode': 200,
