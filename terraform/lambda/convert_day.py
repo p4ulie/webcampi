@@ -1,6 +1,4 @@
-# import subprocess
 import boto3
-import os
 import logging
 import json
 
@@ -8,6 +6,8 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context):
+    logger.info(f'Lambda handler start')
+
     s3_parameters = event['s3_parameters']
 
     # Replace with your bucket name and source/destination directories
@@ -41,9 +41,8 @@ def lambda_handler(event, context):
         hour_directory = obj.key.split('/')[-2]
         if hour_directory not in hour_directory_list:
             hour_directory_list.append(hour_directory)
-            logger.info(f'Adding {hour_directory} to the list of hour directories')
 
-    for hour_directory in hour_directory_list.sort():
+    for hour_directory in hour_directory_list:
         event = {
             "s3_parameters": {
                 "bucket_directory_year": s3_date_year,
@@ -54,11 +53,12 @@ def lambda_handler(event, context):
             }
         }
         logger.info(f'Invoking lambda function {lambda_function_name} for {event}')
-        print(event)
-        # response = lambda_client.invoke(
-        #     FunctionName=lambda_function_name,
-        #     Payload=json.dumps(event),
-        # )
+        response = lambda_client.invoke(
+            FunctionName=lambda_function_name,
+            Payload=json.dumps(event),
+        )
+
+    logger.info(f'Lambda handler finish')
 
     return {
         'statusCode': 200,
