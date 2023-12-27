@@ -1,6 +1,7 @@
 import boto3
 import logging
 import json
+from concurrent.futures import ThreadPoolExecutor
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -42,22 +43,32 @@ def lambda_handler(event, context):
         if hour_directory not in hour_directory_list:
             hour_directory_list.append(hour_directory)
 
-    for hour_directory in hour_directory_list:
-        event = {
-            "s3_parameters": {
-                "bucket_directory_year": s3_date_year,
-                "bucket_directory_month": s3_date_month,
-                "bucket_directory_day": s3_date_day,
-                "bucket_directory_hour": hour_directory,
-                "bucket_directory_destination": s3_destination_directory
+    with ThreadPoolExecutor(max_workers=50) as executor:
+        futs = []
+        for hour_directory in hour_directory_list:
+            event = {
+                "s3_parameters": {
+                    "bucket_directory_year": s3_date_year,
+                    "bucket_directory_month": s3_date_month,
+                    "bucket_directory_day": s3_date_day,
+                    "bucket_directory_hour": hour_directory,
+                    "bucket_directory_destination": s3_destination_directory
+                }
             }
-        }
-        logger.info(f'Invoking lambda function {lambda_function_name} for {event}')
-        response = lambda_client.invoke(
-            FunctionName=lambda_function_name,
-            InvocationType="Event",
-            Payload=json.dumps(event),
-        )
+            logger.info(f'Invoking lambda function {lambda_function_name} for {event}')
+            futs.append(
+                executor.submit(
+                    lambda_client.invoke(
+                        FunctionName=lambda_function_name,
+                        InvocationType="RequestResponse",
+                        Payload=json.dumps(event),
+                    )
+                )
+            )
+        results = [ fut.result() for fut in futs ]
+
+    for result in results:
+        print(result)
 
     logger.info(f'Lambda handler finish')
 
