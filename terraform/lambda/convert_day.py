@@ -55,6 +55,7 @@ def lambda_handler(event, context):
         logger.info(f'Invoking lambda function {lambda_function_name} for {event}')
         response = lambda_client.invoke(
             FunctionName=lambda_function_name,
+            InvocationType="Event",
             Payload=json.dumps(event),
         )
 
