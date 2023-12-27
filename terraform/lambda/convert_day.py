@@ -35,10 +35,13 @@ def lambda_handler(event, context):
     s3_resource = boto3.resource('s3')
     bucket = s3_resource.Bucket(s3_bucket_name)
 
+    logger.info(f'Listing the prefix {s3_source_directory} of bucket {s3_bucket_name}')
     hour_directory_list = []
     for obj in bucket.objects.filter(Prefix=s3_source_directory):
-        if obj.key.split('/')[-2] not in hour_directory_list:
-            hour_directory_list.append(obj.key.split('/')[-2])
+        hour_directory = obj.key.split('/')[-2]
+        if hour_directory not in hour_directory_list:
+            hour_directory_list.append(hour_directory)
+            logger.info(f'Adding {hour_directory} to the list of hour directories')
 
     for hour_directory in hour_directory_list.sort():
         event = {
