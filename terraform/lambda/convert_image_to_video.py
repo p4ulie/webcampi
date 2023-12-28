@@ -31,14 +31,12 @@ def lambda_handler(event, context):
         s3_bucket_name ='webcampi'
 
     s3_date_year = s3_parameters['bucket_directory_year']
-    # s3_date_year = event.get('sourceParameters',{}).get('year','n/a')
     s3_date_month = s3_parameters['bucket_directory_month']
-    # s3_date_month = event.get('sourceParameters',{}).get('month','n/a')
     s3_date_day = s3_parameters['bucket_directory_day']
-    # s3_date_day = event.get('sourceParameters',{}).get('day','n/a')
     s3_date_hour = s3_parameters['bucket_directory_hour']
 
     s3_source_directory = f'{s3_date_year}/{s3_date_month}/{s3_date_day}/{s3_date_hour}/'
+
     if 'bucket_directory_destination' in s3_parameters.keys():
         s3_destination_directory = s3_parameters['bucket_directory_destination']
     else:
