@@ -1,3 +1,4 @@
+import botocore
 import boto3
 import logging
 import json
@@ -28,7 +29,13 @@ def lambda_handler(event, context):
     else:
         s3_destination_directory = 'video_test'
 
-    lambda_client = boto3.client('lambda')
+    config = botocore.config.Config(
+        read_timeout=900,
+        connect_timeout=900,
+        retries={"max_attempts": 0}
+    )
+
+    lambda_client = boto3.client('lambda', config=config)
     lambda_function_name = "convert_image_to_video"
 
     # List subdirectories within the base directory
@@ -43,7 +50,7 @@ def lambda_handler(event, context):
         if hour_directory not in hour_directory_list:
             hour_directory_list.append(hour_directory)
 
-    with ThreadPoolExecutor(max_workers=50) as executor:
+    with ThreadPoolExecutor(max_workers=25) as executor:
         futs = []
         for hour_directory in hour_directory_list:
             event = {
@@ -65,7 +72,8 @@ def lambda_handler(event, context):
                     )
                 )
             )
-        results = [ fut.result() for fut in futs ]
+            logger.info(f'Invoked lambda function {lambda_function_name} for {event}')
+        results = [ fut.result(timeout=None) for fut in futs ]
 
     for result in results:
         print(result)
