@@ -33,7 +33,6 @@ def lambda_handler(event, context):
     s3_date_year = s3_parameters['bucket_directory_year']
     s3_date_month = s3_parameters['bucket_directory_month']
     s3_date_day = s3_parameters['bucket_directory_day']
-    s3_date_hour = s3_parameters['bucket_directory_hour']
 
     s3_source_directory = f'video_test/{s3_date_year}_{s3_date_month}_{s3_date_day}/'
 
@@ -42,12 +41,12 @@ def lambda_handler(event, context):
     else:
         s3_destination_directory = 'video_test'
 
-    image_directory = '/tmp/videos'
-    output_directory = '/tmp/output'
+    source_video_directory = '/tmp/source_videos'
+    output_directory = '/tmp/video_output'
     output_file_name = f'{s3_date_year}_{s3_date_month}_{s3_date_day}_combined.mp4'  # Name for the output video file
 
     # Ensure the local directories exist
-    os.makedirs(image_directory, exist_ok=True)
+    os.makedirs(source_video_directory, exist_ok=True)
     os.makedirs(output_directory, exist_ok=True)
 
     # List subdirectories within the base directory
@@ -58,10 +57,10 @@ def lambda_handler(event, context):
     for obj in bucket.objects.filter(Prefix=s3_source_directory):
         if obj.key != s3_source_directory:
             logger.info(f'Download video {obj.key}')
-            download_from_s3(s3_bucket_name, obj.key, os.path.join(image_directory))
+            download_from_s3(s3_bucket_name, obj.key, os.path.join(source_video_directory))
 
     # Change directory to access the source files
-    os.chdir(image_directory)
+    os.chdir(source_video_directory)
 
     logger.info('Encode the video')
     # Use FFmpeg to create a video from images in the directory
