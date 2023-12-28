@@ -62,18 +62,17 @@ def lambda_handler(event, context):
                     "bucket_directory_destination": s3_destination_directory
                 }
             }
-            logger.info(f'Invoking lambda function {lambda_function_name} for {event}')
+            logger.info(f'Invoking lambda function {lambda_function_name} for {hour_directory}')
             futs.append(
                 executor.submit(
-                    lambda_client.invoke(
-                        FunctionName=lambda_function_name,
-                        InvocationType="RequestResponse",
-                        Payload=json.dumps(event),
-                    )
+                    lambda_client.invoke,
+                    FunctionName=lambda_function_name,
+                    InvocationType="RequestResponse",
+                    Payload=json.dumps(event)
                 )
             )
-            logger.info(f'Invoked lambda function {lambda_function_name} for {event}')
-        results = [ fut.result(timeout=None) for fut in futs ]
+            logger.info(f'Invoked lambda function {lambda_function_name} for {hour_directory}')
+        results = [ fut.result() for fut in futs ]
 
     for result in results:
         print(result)
