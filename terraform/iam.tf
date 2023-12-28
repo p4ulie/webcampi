@@ -102,7 +102,7 @@ data "aws_iam_policy_document" "lambda_logs" {
       "logs:PutLogEvents"
     ]
 
-    resources = ["arn:aws:logs:*:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/convert_image_to_video:*"]
+    resources = ["arn:aws:logs:*:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/*:*"]
   }
 }
 
