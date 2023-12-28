@@ -36,6 +36,34 @@ resource "aws_lambda_function" "convert_image_to_video" {
   }
 }
 
+# lambda function combine_videos
+data "archive_file" "combine_videos" {
+  type        = "zip"
+  source_file = "lambda/combine_videos.py"
+  output_path = "lambda/combine_videos_payload.zip"
+}
+
+resource "aws_lambda_function" "combine_videos" {
+  # If the file is not in the current working directory you will need to include a
+  # path.module in the filename.
+  filename      = "lambda/combine_videos_payload.zip"
+  function_name = "combine_videos"
+  role          = aws_iam_role.lambda_convert_image_to_video.arn
+  handler       = "combine_videos.lambda_handler"
+
+  source_code_hash = data.archive_file.combine_videos.output_base64sha256
+
+  runtime = "python3.12"
+  layers = [aws_lambda_layer_version.lambda_layer_ffmpeg.arn]
+
+  memory_size = 1536
+  timeout = 900
+
+  ephemeral_storage {
+    size = 10240 # Min 512 MB and the Max 10240 MB
+  }
+}
+
 # lambda function convert_day
 data "archive_file" "convert_day" {
   type        = "zip"
