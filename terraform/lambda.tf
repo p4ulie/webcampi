@@ -28,7 +28,7 @@ resource "aws_lambda_function" "convert_image_to_video" {
   runtime = "python3.12"
   layers = [aws_lambda_layer_version.lambda_layer_ffmpeg.arn]
 
-  memory_size = 1500
+  memory_size = 1536
   timeout = 900
 
   ephemeral_storage {
@@ -55,7 +55,7 @@ resource "aws_lambda_function" "convert_day" {
 
   runtime = "python3.12"
 
-  memory_size = 128
+  memory_size = 1536
   timeout = 900
 
   ephemeral_storage {
