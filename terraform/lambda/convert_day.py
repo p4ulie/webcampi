@@ -77,6 +77,20 @@ def lambda_handler(event, context):
     for result in results:
         print(result)
 
+    lambda_function_name = "combine_videos"
+    event = {
+        "s3_parameters": {
+            "bucket_directory_year": s3_date_year,
+            "bucket_directory_month": s3_date_month,
+            "bucket_directory_day": s3_date_day
+        }
+    }
+    lambda_client.invoke(
+        FunctionName=lambda_function_name,
+        InvocationType="RequestResponse",
+        Payload=json.dumps(event)
+    )
+
     logger.info(f'Lambda handler finish')
 
     return {
