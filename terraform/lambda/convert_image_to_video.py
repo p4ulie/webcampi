@@ -44,7 +44,7 @@ def lambda_handler(event, context):
 
     image_directory = '/tmp/images'
     output_directory = '/tmp/output'
-    output_file_name = f'{s3_date_year}_{s3_date_month}_{s3_date_day}_{s3_date_hour}_test.mp4'  # Name for the output video file
+    output_file_name = f'{s3_date_year}_{s3_date_month}_{s3_date_day}_{s3_date_hour}.mp4'  # Name for the output video file
 
     # Ensure the local directories exist
     os.makedirs(image_directory, exist_ok=True)
