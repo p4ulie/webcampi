@@ -27,7 +27,7 @@ def lambda_handler(event, context):
     if 'bucket_directory_destination' in s3_parameters.keys():
         s3_destination_directory = s3_parameters['bucket_directory_destination']
     else:
-        s3_destination_directory = f'video_test/{s3_date_year}_{s3_date_month}_{s3_date_day}'
+        s3_destination_directory = f'video_processing/{s3_date_year}_{s3_date_month}_{s3_date_day}'
 
     config = botocore.config.Config(
         read_timeout=900,

@@ -40,7 +40,7 @@ def lambda_handler(event, context):
     if 'bucket_directory_destination' in s3_parameters.keys():
         s3_destination_directory = s3_parameters['bucket_directory_destination']
     else:
-        s3_destination_directory = 'video'
+        s3_destination_directory = 'video_processing'
 
     image_directory = '/tmp/images'
     output_directory = '/tmp/output'

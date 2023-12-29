@@ -34,12 +34,12 @@ def lambda_handler(event, context):
     s3_date_month = s3_parameters['bucket_directory_month']
     s3_date_day = s3_parameters['bucket_directory_day']
 
-    s3_source_directory = f'video_test/{s3_date_year}_{s3_date_month}_{s3_date_day}'
+    s3_source_directory = f'video_processing/{s3_date_year}_{s3_date_month}_{s3_date_day}'
 
     if 'bucket_directory_destination' in s3_parameters.keys():
         s3_destination_directory = s3_parameters['bucket_directory_destination']
     else:
-        s3_destination_directory = 'video_test'
+        s3_destination_directory = 'video'
 
     source_video_directory = '/tmp/source_videos'
     output_directory = '/tmp/video_output'
