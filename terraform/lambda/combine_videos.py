@@ -59,10 +59,10 @@ def lambda_handler(event, context):
             logger.info(f'Download video {obj.key}')
             download_from_s3(s3_bucket_name, obj.key, os.path.join(source_video_directory))
 
-    file_list = [ source_video_directory+"/"+obj.key.split("/")[-1] for obj in bucket.objects.filter(Prefix=s3_source_directory)]
-    f = open(source_video_directory+"/file_list.txt", "w")
+    file_list = [ os.path.join(source_video_directory, obj.key.split("/")[-1]) for obj in bucket.objects.filter(Prefix=s3_source_directory)]
+    f = open(os.path.join(source_video_directory, "file_list.txt"), "w")
     for file in file_list:
-        f.write(f'file \'{file}\'')
+        f.write(f'file \'{file}\'\n')
     f.close()
 
     # Change directory to access the source files
@@ -70,7 +70,7 @@ def lambda_handler(event, context):
 
     logger.info('Encode the video')
     # Use FFmpeg to create a video from images in the directory
-    subprocess.run(['/opt/ffmpeg/ffmpeg', '-i', 'file_list.txt', '-codec', 'copy', os.path.join(output_directory, output_file_name)], check=True)
+    subprocess.run(['/opt/ffmpeg/ffmpeg', '-f', 'concat', '-safe', '0', '-i', 'file_list.txt', '-codec', 'copy', os.path.join(output_directory, output_file_name)], check=True)
 
     logger.info('Upload the video {os.path.join(output_directory, output_file_name)}')
     # Upload the resulting video to S3
