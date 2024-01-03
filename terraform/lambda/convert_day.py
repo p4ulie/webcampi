@@ -3,11 +3,15 @@ import boto3
 import logging
 import json
 from concurrent.futures import ThreadPoolExecutor
+import datetime
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context):
+    # today = datetime.datetime.today()
+    yesterday = datetime.datetime.today() - datetime.timedelta(days = 1)
+
     logger.info(f'Lambda handler start')
 
     s3_parameters = event['s3_parameters']
@@ -18,9 +22,20 @@ def lambda_handler(event, context):
     else:
         s3_bucket_name ='webcampi'
 
-    s3_date_year = s3_parameters['bucket_directory_year']
-    s3_date_month = s3_parameters['bucket_directory_month']
-    s3_date_day = s3_parameters['bucket_directory_day']
+    if 'bucket_directory_year' in s3_parameters.keys():
+        s3_date_year = s3_parameters['bucket_directory_year']
+    else:
+        s3_date_year = yesterday.year
+
+    if 'bucket_directory_month' in s3_parameters.keys():
+        s3_date_month = s3_parameters['bucket_directory_month']
+    else:
+        s3_date_month = yesterday.month
+
+    if 'bucket_directory_day' in s3_parameters.keys():
+        s3_date_day = s3_parameters['bucket_directory_day']
+    else:
+        s3_date_day = yesterday.day
 
     s3_source_directory = f'{s3_date_year}/{s3_date_month}/{s3_date_day}/'
 
