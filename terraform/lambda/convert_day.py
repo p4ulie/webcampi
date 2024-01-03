@@ -23,7 +23,9 @@ def lambda_handler(event, context):
     s3_destination_directory = f'video_processing/{s3_date_year}_{s3_date_month}_{s3_date_day}'
 
     if 's3_parameters' in event.keys():
-        s3_parameters = event['s3_parameters']
+        logger.info(f's3_parameters structure detected in event data.')
+
+        s3_parameters = event.get('s3_parameters', None)
 
         # Replace with your bucket name and source/destination directories
         if 'bucket_name' in s3_parameters.keys():
