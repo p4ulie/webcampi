@@ -17,9 +17,9 @@ def download_from_s3(bucket_name, s3_directory, local_directory):
             file_path = os.path.join(local_directory, file_name)
             bucket.download_file(obj.key, file_path)
 
-def upload_to_s3(bucket_name, local_file_path, s3_directory, s3_file_name):
+def upload_to_s3(bucket_name, local_file_path, s3_directory, s3_file_name,content_type='video/mp4'):
     s3_client = boto3.client('s3')
-    s3_client.upload_file(local_file_path, bucket_name, f'{s3_directory}/{s3_file_name}')
+    s3_client.upload_file(local_file_path, bucket_name, f'{s3_directory}/{s3_file_name}', ExtraArgs={'ContentType': content_type})
 
 def lambda_handler(event, context):
     s3_parameters = event['s3_parameters']
