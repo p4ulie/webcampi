@@ -90,10 +90,8 @@ def lambda_handler(event, context):
 if __name__ == "__main__":
     event = {
         "s3_parameters": {
-            "bucket_directory_year": "2023",
-            "bucket_directory_month": "12",
-            "bucket_directory_day": "01",
-            "bucket_directory_hour": "11"
+            "s3_bucket_name": "webcampi",
+            "video_directory": "video"
         }
     }
     lambda_handler(event, "")

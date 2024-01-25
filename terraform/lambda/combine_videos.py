@@ -2,6 +2,7 @@ import subprocess
 import boto3
 import os
 import logging
+import json
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -79,6 +80,27 @@ def lambda_handler(event, context):
         local_file_path=os.path.join(output_directory, output_file_name),
         s3_directory=s3_destination_directory,
         s3_file_name=output_file_name
+    )
+
+    config = botocore.config.Config(
+        read_timeout=900,
+        connect_timeout=900,
+        retries={"max_attempts": 0}
+    )
+
+    lambda_client = boto3.client('lambda', config=config)
+    lambda_function_name = "generate_video_page"
+
+    event = {
+        "s3_parameters": {
+            "s3_bucket_name": s3_bucket_name,
+            "video_directory": 'video'
+        }
+    }
+    lambda_client.invoke(
+        FunctionName=lambda_function_name,
+        InvocationType="RequestResponse",
+        Payload=json.dumps(event)
     )
 
     return {
