@@ -90,3 +90,30 @@ resource "aws_lambda_function" "convert_day" {
     size = 512 # Min 512 MB and the Max 10240 MB
   }
 }
+
+# lambda function generate_video_page
+data "archive_file" "generate_video_page" {
+  type        = "zip"
+  source_file = "lambda/generate_video_page.py"
+  output_path = "lambda/generate_video_page.zip"
+}
+
+resource "aws_lambda_function" "generate_video_page" {
+  # If the file is not in the current working directory you will need to include a
+  # path.module in the filename.
+  filename      = "lambda/generate_video_page.zip"
+  function_name = "generate_video_page"
+  role          = aws_iam_role.lambda_convert_image_to_video.arn
+  handler       = "generate_video_page.lambda_handler"
+
+  source_code_hash = data.archive_file.generate_video_page.output_base64sha256
+
+  runtime = "python3.12"
+
+  memory_size = 1536
+  timeout = 900
+
+  ephemeral_storage {
+    size = 512 # Min 512 MB and the Max 10240 MB
+  }
+}
