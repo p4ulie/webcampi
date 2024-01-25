@@ -65,7 +65,7 @@ def lambda_handler(event, context):
 
     logger.info('Encode the video')
     # Use FFmpeg to create a video from images in the directory
-    subprocess.run(['/opt/ffmpeg/ffmpeg', '-y', '-framerate', '30', '-pattern_type', 'glob', '-i', '*.jpg', '-c:v', 'libx265', '-pix_fmt', 'yuv420p', os.path.join(output_directory, output_file_name)], check=True)
+    subprocess.run(['/opt/ffmpeg/ffmpeg', '-y', '-framerate', '30', '-pattern_type', 'glob', '-i', '*.jpg', '-c:v', 'libx265', '-vtag', 'hvc1', '-pix_fmt', 'yuv420p', os.path.join(output_directory, output_file_name)], check=True)
 
     logger.info('Upload the video {os.path.join(output_directory, output_file_name)}')
     # Upload the resulting video to S3
@@ -81,13 +81,13 @@ def lambda_handler(event, context):
         'body': 'Video transcoding complete.'
     }
 
-# if __name__ == "__main__":
-#     event = {
-#         "s3_parameters": {
-#             "bucket_directory_year": "2023",
-#             "bucket_directory_month": "12",
-#             "bucket_directory_day": "01",
-#             "bucket_directory_hour": "11"
-#         }
-#     }
-#     lambda_handler(event, "")
+if __name__ == "__main__":
+    event = {
+        "s3_parameters": {
+            "bucket_directory_year": "2024",
+            "bucket_directory_month": "01",
+            "bucket_directory_day": "24",
+            "bucket_directory_hour": "11"
+        }
+    }
+    lambda_handler(event, "")
