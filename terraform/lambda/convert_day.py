@@ -57,21 +57,21 @@ def lambda_handler(event, context):
     lambda_client = boto3.client('lambda', config=config)
     lambda_function_name = "convert_image_to_video"
 
-    # List subdirectories within the base directory
-    # s3_client = boto3.client('s3')
     s3_resource = boto3.resource('s3')
     bucket = s3_resource.Bucket(s3_bucket_name)
 
     logger.info(f'Listing the prefix {s3_source_directory} of bucket {s3_bucket_name}')
+
     hour_directory_list = []
     for obj in bucket.objects.filter(Prefix=s3_source_directory):
         hour_directory = obj.key.split('/')[-2]
         if hour_directory not in hour_directory_list:
             hour_directory_list.append(hour_directory)
+            logger.info(f'Added {hour_directory} to list for processing')
 
     with ThreadPoolExecutor(max_workers=25) as executor:
         futs = []
-        for hour_directory in hour_directory_list.sort():
+        for hour_directory in sorted(hour_directory_list):
             event = {
                 "s3_parameters": {
                     "bucket_directory_year": s3_date_year,
