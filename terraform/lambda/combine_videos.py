@@ -62,7 +62,7 @@ def lambda_handler(event, context):
 
     file_list = [ os.path.join(source_video_directory, obj.key.split("/")[-1]) for obj in bucket.objects.filter(Prefix=s3_source_directory)]
     f = open(os.path.join(source_video_directory, "file_list.txt"), "w")
-    for file in file_list:
+    for file in file_list.sort():
         f.write(f'file \'{file}\'\n')
     f.close()
 

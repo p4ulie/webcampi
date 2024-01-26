@@ -70,7 +70,7 @@ def lambda_handler(event, context):
 
     with ThreadPoolExecutor(max_workers=25) as executor:
         futs = []
-        for hour_directory in hour_directory_list:
+        for hour_directory in hour_directory_list.sort():
             event = {
                 "s3_parameters": {
                     "bucket_directory_year": s3_date_year,
