@@ -45,8 +45,8 @@ def lambda_handler(event, context):
         if 'bucket_directory_destination' in s3_parameters.keys():
             s3_destination_directory = s3_parameters['bucket_directory_destination']
 
-    logger.info(f'Source directory: {s3_source_directory} of bucket {s3_bucket_name}')
     s3_source_directory = f'{s3_date_year}/{s3_date_month}/{s3_date_day}/'
+    logger.info(f'Source directory: {s3_source_directory} of bucket {s3_bucket_name}')
 
     config = botocore.config.Config(
         read_timeout=900,
@@ -117,12 +117,12 @@ def lambda_handler(event, context):
         'body': 'Video transcoding complete.'
     }
 
-# if __name__ == "__main__":
-#     event = {
-#         "s3_parameters": {
-#             "bucket_directory_year": "2023",
-#             "bucket_directory_month": "12",
-#             "bucket_directory_day": "01",
-#         }
-#     }
-#     lambda_handler(event, "")
+if __name__ == "__main__":
+    event = {
+        "s3_parameters": {
+            "bucket_directory_year": "2024",
+            "bucket_directory_month": "01",
+            "bucket_directory_day": "24",
+        }
+    }
+    lambda_handler(event, "")
