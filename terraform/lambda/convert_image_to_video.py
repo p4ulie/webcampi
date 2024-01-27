@@ -1,5 +1,7 @@
 import subprocess
 import boto3
+import botocore
+import boto3.s3.transfer as s3transfer
 import os
 import logging
 import shutil
@@ -15,19 +17,25 @@ log_stream.setLevel(logging.INFO)
 log_stream.setFormatter(log_formatter)
 logger.addHandler(log_stream)
 
-def download_from_s3(bucket_name, s3_directory, local_directory):
-    s3 = boto3.client('s3')
-    s3_resource = boto3.resource('s3')
-    bucket = s3_resource.Bucket(bucket_name)
+def download_from_s3_transfer(bucket_name, s3_directory, local_directory, file_list, workers=20):
+    botocore_config = botocore.config.Config(max_pool_connections=workers)
+    s3client = boto3.Session().client('s3', config=botocore_config)
+    transfer_config = s3transfer.TransferConfig(
+        use_threads=True,
+        max_concurrency=workers,
+    )
+    s3t = s3transfer.create_transfer_manager(s3client, transfer_config)
+    for file in file_list:
+        # dst = os.path.join(s3_directory, os.path.basename(file))
+        logger.info(f'Adding transfer of {os.path.join(s3_directory, file)}')
 
-    logger.info(f'Download images from {s3_directory}')
-
-    for obj in bucket.objects.filter(Prefix=s3_directory):
-        if obj.key.endswith('.jpg'):
-            file_name = obj.key.split('/')[-1]
-            file_path = os.path.join(local_directory, file_name)
-            logger.info(f'Download image {obj.key} to {file_path}')
-            bucket.download_file(obj.key, file_path)
+        s3t.download(
+            bucket_name, os.path.join(s3_directory, file), os.path.join(local_directory, file),
+            # subscribers=[
+            #     s3transfer.ProgressCallbackInvoker(progress_func),
+            # ],
+        )
+    s3t.shutdown()  # wait for all the upload tasks to finish
 
 def upload_to_s3(bucket_name, local_file_path, s3_directory, s3_file_name,content_type='video/mp4'):
     s3_client = boto3.client('s3')
@@ -75,9 +83,16 @@ def lambda_handler(event, context):
     s3_resource = boto3.resource('s3')
     bucket = s3_resource.Bucket(s3_bucket_name)
 
+    # for obj in bucket.objects.filter(Prefix=s3_source_directory):
+    #     if obj.key != s3_source_directory:
+    #         download_from_s3(s3_bucket_name, obj.key, os.path.join(image_directory))
+
+    file_list = []
     for obj in bucket.objects.filter(Prefix=s3_source_directory):
-        if obj.key != s3_source_directory:
-            download_from_s3(s3_bucket_name, obj.key, os.path.join(image_directory))
+        if obj.key.endswith('.jpg'):
+            file_list.append(obj.key.split('/')[-1])
+
+    download_from_s3_transfer(s3_bucket_name, s3_source_directory, os.path.join(image_directory), file_list)
 
     # Change directory to access the source files
     os.chdir(image_directory)
