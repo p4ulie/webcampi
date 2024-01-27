@@ -18,18 +18,24 @@ def download_from_s3(bucket_name, s3_directory, local_directory):
     s3_resource = boto3.resource('s3')
     bucket = s3_resource.Bucket(bucket_name)
 
+    logger.info(f'Download images from {s3_directory}')
+
     for obj in bucket.objects.filter(Prefix=s3_directory):
         if obj.key.endswith('.jpg'):
             file_name = obj.key.split('/')[-1]
             file_path = os.path.join(local_directory, file_name)
+            logger.info(f'Download image {obj.key} to {file_path}')
             bucket.download_file(obj.key, file_path)
 
 def upload_to_s3(bucket_name, local_file_path, s3_directory, s3_file_name,content_type='video/mp4'):
     s3_client = boto3.client('s3')
+    logger.info(f'Uploading the video {local_file_path} to {s3_directory}/{s3_file_name}')
     s3_client.upload_file(local_file_path, bucket_name, f'{s3_directory}/{s3_file_name}', ExtraArgs={'ContentType': content_type})
 
 def lambda_handler(event, context):
     s3_parameters = event['s3_parameters']
+
+    logger.info(f'Event data: {event}')
 
     # Replace with your bucket name and source/destination directories
     if 'bucket_name' in s3_parameters.keys():
@@ -64,7 +70,6 @@ def lambda_handler(event, context):
 
     for obj in bucket.objects.filter(Prefix=s3_source_directory):
         if obj.key != s3_source_directory:
-            logger.info(f'Download image {obj.key}')
             download_from_s3(s3_bucket_name, obj.key, os.path.join(image_directory))
 
     # Change directory to access the source files

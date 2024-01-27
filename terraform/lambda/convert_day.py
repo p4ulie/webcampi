@@ -29,6 +29,8 @@ def lambda_handler(event, context):
 
     s3_destination_directory = f'video_processing/{s3_date_year}_{s3_date_month}_{s3_date_day}'
 
+    logger.info(f'Event data: {event}')
+
     if 's3_parameters' in event.keys():
         logger.info(f's3_parameters structure detected in event data.')
 
@@ -105,17 +107,20 @@ def lambda_handler(event, context):
         print(result)
 
     lambda_function_name = "combine_videos"
-    event = {
+    invoke_event = {
         "s3_parameters": {
             "bucket_directory_year": s3_date_year,
             "bucket_directory_month": s3_date_month,
             "bucket_directory_day": s3_date_day
         }
     }
+
+    logger.info(f'Combine videos invoke event: {invoke_event}')
+
     lambda_client.invoke(
         FunctionName=lambda_function_name,
         InvocationType="RequestResponse",
-        Payload=json.dumps(event)
+        Payload=json.dumps(invoke_event)
     )
 
     logger.info(f'Lambda handler finish')
