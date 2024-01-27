@@ -5,6 +5,13 @@ import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+log_formatter = logging.Formatter('%(message)s')
+
+log_stream = logging.StreamHandler()
+log_stream.setLevel(logging.INFO)
+log_stream.setFormatter(log_formatter)
+logger.addHandler(log_stream)
+
 def upload_to_s3(bucket_name, local_file_path, s3_directory, s3_file_name, content_type=''):
     s3_client = boto3.client('s3')
 

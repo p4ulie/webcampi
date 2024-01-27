@@ -8,6 +8,13 @@ import datetime
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+log_formatter = logging.Formatter('%(message)s')
+
+log_stream = logging.StreamHandler()
+log_stream.setLevel(logging.INFO)
+log_stream.setFormatter(log_formatter)
+logger.addHandler(log_stream)
+
 def lambda_handler(event, context):
     # today = datetime.datetime.today()
     yesterday = datetime.datetime.today() - datetime.timedelta(days = 1)

@@ -6,6 +6,13 @@ import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+log_formatter = logging.Formatter('%(message)s')
+
+log_stream = logging.StreamHandler()
+log_stream.setLevel(logging.INFO)
+log_stream.setFormatter(log_formatter)
+logger.addHandler(log_stream)
+
 def download_from_s3(bucket_name, s3_directory, local_directory):
     s3 = boto3.client('s3')
     s3_resource = boto3.resource('s3')
