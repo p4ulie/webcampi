@@ -82,6 +82,7 @@ def lambda_handler(event, context):
                 }
             }
             logger.info(f'Invoking lambda function {lambda_function_name} for {hour_directory}')
+            logger.info(f'Lambda function data: {event}')
             futs.append(
                 executor.submit(
                     lambda_client.invoke,
