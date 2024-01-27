@@ -71,6 +71,8 @@ def lambda_handler(event, context):
     output_directory = '/tmp/output'
     output_file_name = f'index.html'  # Name for the output video file
 
+    os.makedirs(output_directory, exist_ok=True)
+
     f = open(f'{output_directory}/{output_file_name}', "w")
     f.write(html_page_beginning)
 
@@ -81,6 +83,8 @@ def lambda_handler(event, context):
 
     f.write(html_page_end)
     f.close()
+
+    logger.info('Uploaded the HTML file')
 
     # Upload the resulting video to S3
     upload_to_s3(
