@@ -87,7 +87,7 @@ if __name__ == "__main__":
             "bucket_directory_year": "2024",
             "bucket_directory_month": "01",
             "bucket_directory_day": "24",
-            "bucket_directory_hour": "11"
+            "bucket_directory_hour": "00"
         }
     }
     lambda_handler(event, "")
