@@ -18,7 +18,7 @@ log_stream.setFormatter(log_formatter)
 logger.addHandler(log_stream)
 
 
-def download_from_s3_transfer(bucket_name, s3_directory, local_directory, file_list, workers=20):
+def download_from_s3_transfer(bucket_name, s3_directory, local_directory, file_list, workers=30):
     botocore_config = botocore.config.Config(max_pool_connections=workers)
     s3client = boto3.Session().client('s3', config=botocore_config)
     transfer_config = s3transfer.TransferConfig(
