@@ -13,6 +13,7 @@ log_stream.setLevel(logging.INFO)
 log_stream.setFormatter(log_formatter)
 logger.addHandler(log_stream)
 
+
 def upload_to_s3(bucket_name, local_file_path, s3_directory, s3_file_name, content_type=''):
     s3_client = boto3.client('s3')
 
@@ -23,6 +24,7 @@ def upload_to_s3(bucket_name, local_file_path, s3_directory, s3_file_name, conte
         ExtraArgs={'ContentType': content_type}
     )
 
+
 def lambda_handler(event, context):
     s3_parameters = event['s3_parameters']
 
@@ -30,15 +32,14 @@ def lambda_handler(event, context):
     if 'bucket_name' in s3_parameters.keys():
         s3_bucket_name = s3_parameters['bucket_name']
     else:
-        s3_bucket_name ='webcampi'
+        s3_bucket_name = 'webcampi'
 
     if 'video_directory' in s3_parameters.keys():
         video_directory = s3_parameters['video_directory']
     else:
-        video_directory ='video'
+        video_directory = 'video'
 
     # List subdirectories within the base directory
-    s3 = boto3.client('s3')
     s3_resource = boto3.resource('s3')
     bucket = s3_resource.Bucket(s3_bucket_name)
 
@@ -67,7 +68,6 @@ def lambda_handler(event, context):
 </html>
     """
 
-
     output_directory = '/tmp/output'
     output_file_name = f'index.html'  # Name for the output video file
 
@@ -95,6 +95,7 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'body': 'Video list upload complete.'
     }
+
 
 if __name__ == "__main__":
     event = {

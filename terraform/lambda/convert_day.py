@@ -16,13 +16,14 @@ log_stream.setLevel(logging.INFO)
 log_stream.setFormatter(log_formatter)
 logger.addHandler(log_stream)
 
+
 def lambda_handler(event, context):
     # today = datetime.datetime.today()
-    yesterday = datetime.datetime.today() - datetime.timedelta(days = 1)
+    yesterday = datetime.datetime.today() - datetime.timedelta(days=1)
 
     logger.info(f'Lambda handler start')
 
-    s3_bucket_name ='webcampi'
+    s3_bucket_name = 'webcampi'
 
     s3_date_year = yesterday.year
     s3_date_month = f'{yesterday.month:02}'
@@ -102,7 +103,7 @@ def lambda_handler(event, context):
                 )
             )
             logger.info(f'Invoked lambda function {lambda_function_name} for {hour_directory}')
-        results = [ fut.result() for fut in futs ]
+        results = [fut.result() for fut in futs]
 
     for result in results:
         print(result)
@@ -130,6 +131,7 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'body': 'Video transcoding complete.'
     }
+
 
 if __name__ == "__main__":
     event = {

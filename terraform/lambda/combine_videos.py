@@ -1,5 +1,6 @@
 import subprocess
 import boto3
+import botocore
 import os
 import logging
 import json
@@ -15,8 +16,8 @@ log_stream.setLevel(logging.INFO)
 log_stream.setFormatter(log_formatter)
 logger.addHandler(log_stream)
 
+
 def download_from_s3(bucket_name, s3_directory, local_directory):
-    s3 = boto3.client('s3')
     s3_resource = boto3.resource('s3')
     bucket = s3_resource.Bucket(bucket_name)
 
@@ -26,9 +27,16 @@ def download_from_s3(bucket_name, s3_directory, local_directory):
             file_path = os.path.join(local_directory, file_name)
             bucket.download_file(obj.key, file_path)
 
+
 def upload_to_s3(bucket_name, local_file_path, s3_directory, s3_file_name, content_type='video/mp4'):
     s3_client = boto3.client('s3')
-    s3_client.upload_file(local_file_path, bucket_name, f"{s3_directory}/{s3_file_name}", ExtraArgs={'ContentType': content_type})
+    s3_client.upload_file(
+        local_file_path,
+        bucket_name,
+        f"{s3_directory}/{s3_file_name}",
+        ExtraArgs={'ContentType': content_type}
+    )
+
 
 def lambda_handler(event, context):
     s3_parameters = event['s3_parameters']
@@ -37,7 +45,7 @@ def lambda_handler(event, context):
     if 'bucket_name' in s3_parameters.keys():
         s3_bucket_name = s3_parameters['bucket_name']
     else:
-        s3_bucket_name ='webcampi'
+        s3_bucket_name = 'webcampi'
 
     s3_date_year = s3_parameters['bucket_directory_year']
     s3_date_month = s3_parameters['bucket_directory_month']
@@ -59,7 +67,6 @@ def lambda_handler(event, context):
     os.makedirs(output_directory, exist_ok=True)
 
     # List subdirectories within the base directory
-    s3 = boto3.client('s3')
     s3_resource = boto3.resource('s3')
     bucket = s3_resource.Bucket(s3_bucket_name)
 
@@ -68,7 +75,7 @@ def lambda_handler(event, context):
             logger.info(f'Download video {obj.key}')
             download_from_s3(s3_bucket_name, obj.key, os.path.join(source_video_directory))
 
-    file_list = [ os.path.join(source_video_directory, obj.key.split("/")[-1]) for obj in bucket.objects.filter(Prefix=s3_source_directory)]
+    file_list = [os.path.join(source_video_directory, obj.key.split("/")[-1]) for obj in bucket.objects.filter(Prefix=s3_source_directory)]
     f = open(os.path.join(source_video_directory, "file_list.txt"), "w")
     for file in sorted(file_list):
         f.write(f'file \'{file}\'\n')
@@ -79,7 +86,21 @@ def lambda_handler(event, context):
 
     logger.info('Encode the video')
     # Use FFmpeg to create a video from images in the directory
-    subprocess.run(['/opt/ffmpeg/ffmpeg', '-f', 'concat', '-safe', '0', '-i', 'file_list.txt', '-codec', 'copy', os.path.join(output_directory, output_file_name)], check=True)
+    subprocess.run(
+        [
+            '/opt/ffmpeg/ffmpeg',
+            '-f',
+            'concat',
+            '-safe',
+            '0',
+            '-i',
+            'file_list.txt',
+            '-codec',
+            'copy',
+            os.path.join(output_directory, output_file_name)
+        ],
+        check=True
+    )
 
     logger.info(f'Upload the video {os.path.join(output_directory, output_file_name)}')
     # Upload the resulting video to S3

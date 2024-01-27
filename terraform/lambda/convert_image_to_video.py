@@ -17,6 +17,7 @@ log_stream.setLevel(logging.INFO)
 log_stream.setFormatter(log_formatter)
 logger.addHandler(log_stream)
 
+
 def download_from_s3_transfer(bucket_name, s3_directory, local_directory, file_list, workers=20):
     botocore_config = botocore.config.Config(max_pool_connections=workers)
     s3client = boto3.Session().client('s3', config=botocore_config)
@@ -37,10 +38,17 @@ def download_from_s3_transfer(bucket_name, s3_directory, local_directory, file_l
         )
     s3t.shutdown()  # wait for all the upload tasks to finish
 
-def upload_to_s3(bucket_name, local_file_path, s3_directory, s3_file_name,content_type='video/mp4'):
+
+def upload_to_s3(bucket_name, local_file_path, s3_directory, s3_file_name, content_type='video/mp4'):
     s3_client = boto3.client('s3')
     logger.info(f'Uploading the video {local_file_path} to {s3_directory}/{s3_file_name}')
-    s3_client.upload_file(local_file_path, bucket_name, f'{s3_directory}/{s3_file_name}', ExtraArgs={'ContentType': content_type})
+    s3_client.upload_file(
+        local_file_path,
+        bucket_name,
+        f'{s3_directory}/{s3_file_name}',
+        ExtraArgs={'ContentType': content_type}
+    )
+
 
 def lambda_handler(event, context):
     s3_parameters = event['s3_parameters']
@@ -51,7 +59,7 @@ def lambda_handler(event, context):
     if 'bucket_name' in s3_parameters.keys():
         s3_bucket_name = s3_parameters['bucket_name']
     else:
-        s3_bucket_name ='webcampi'
+        s3_bucket_name = 'webcampi'
 
     s3_date_year = s3_parameters['bucket_directory_year']
     s3_date_month = s3_parameters['bucket_directory_month']
@@ -67,7 +75,7 @@ def lambda_handler(event, context):
 
     image_directory = '/tmp/images'
     output_directory = '/tmp/output'
-    output_file_name = f'{s3_date_year}_{s3_date_month}_{s3_date_day}_{s3_date_hour}.mp4'  # Name for the output video file
+    output_file_name = f'{s3_date_year}_{s3_date_month}_{s3_date_day}_{s3_date_hour}.mp4'
 
     # Delete the content of the directories
     # (it looks like the block device is being re-used and there are leftover files from previous run)
@@ -79,7 +87,6 @@ def lambda_handler(event, context):
     os.makedirs(output_directory, exist_ok=True)
 
     # List subdirectories within the base directory
-    s3 = boto3.client('s3')
     s3_resource = boto3.resource('s3')
     bucket = s3_resource.Bucket(s3_bucket_name)
 
@@ -99,7 +106,26 @@ def lambda_handler(event, context):
 
     logger.info('Encode the video')
     # Use FFmpeg to create a video from images in the directory
-    subprocess.run(['/opt/ffmpeg/ffmpeg', '-y', '-framerate', '30', '-pattern_type', 'glob', '-i', '*.jpg', '-c:v', 'libx265', '-vtag', 'hvc1', '-pix_fmt', 'yuv420p', os.path.join(output_directory, output_file_name)], check=True)
+    subprocess.run(
+        [
+            '/opt/ffmpeg/ffmpeg',
+            '-y',
+            '-framerate',
+            '30',
+            '-pattern_type',
+            'glob',
+            '-i',
+            '*.jpg',
+            '-c:v',
+            'libx265',
+            '-vtag',
+            'hvc1',
+            '-pix_fmt',
+            'yuv420p',
+            os.path.join(output_directory, output_file_name)
+        ],
+        check=True
+    )
 
     logger.info(f'Upload the video {os.path.join(output_directory, output_file_name)}')
     # Upload the resulting video to S3
@@ -114,6 +140,7 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'body': 'Video transcoding complete.'
     }
+
 
 if __name__ == "__main__":
     event = {
