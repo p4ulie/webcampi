@@ -61,13 +61,14 @@ def lambda_handler(event, context):
     output_directory = '/tmp/output'
     output_file_name = f'{s3_date_year}_{s3_date_month}_{s3_date_day}_{s3_date_hour}.mp4'  # Name for the output video file
 
+    # Delete the content of the directories
+    # (it looks like the block device is being re-used and there are leftover files from previous run)
+    shutil.rmtree(image_directory, ignore_errors=True)
+    shutil.rmtree(output_directory, ignore_errors=True)
+
     # Ensure the local directories exist
     os.makedirs(image_directory, exist_ok=True)
     os.makedirs(output_directory, exist_ok=True)
-    # Delete the content of the directories
-    # (it looks like the block device is being re-used and there are leftover files from previous run)
-    shutil.rmtree(image_directory)
-    shutil.rmtree(output_directory)
 
     # List subdirectories within the base directory
     s3 = boto3.client('s3')
