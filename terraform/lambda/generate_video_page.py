@@ -59,9 +59,10 @@ def lambda_handler(event, context):
 <title>Video list</title>
 </head>
 <body>
+<p style="font-size:20px">
     """
 
-    html_page_end = """</body>
+    html_page_end = """</p></body>
 </html>
     """
 
