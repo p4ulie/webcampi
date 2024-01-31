@@ -142,3 +142,22 @@ resource "aws_s3_bucket_versioning" "video" {
     status = "Disabled"
   }
 }
+
+resource "aws_s3_bucket_lifecycle_configuration" "example" {
+  bucket = aws_s3_bucket.video.id
+
+  rule {
+    id = "storage_class_change_for_images"
+
+    filter {
+      prefix = "202*/"
+    }
+
+    transition {
+      days          = 30
+      storage_class = "GLACIER_IR"
+    }
+
+    status = "Enabled"
+  }
+}
