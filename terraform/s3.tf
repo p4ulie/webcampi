@@ -10,27 +10,6 @@ resource "aws_s3_bucket_ownership_controls" "video" {
   }
 }
 
-#Using S3 bucket policy to controll access, ACL not needed here
-
-#resource "aws_s3_bucket_public_access_block" "video" {
-#  bucket = aws_s3_bucket.video.id
-#
-#  block_public_acls       = false
-#  block_public_policy     = false
-#  ignore_public_acls      = false
-#  restrict_public_buckets = false
-#}
-
-#resource "aws_s3_bucket_acl" "video" {
-#  depends_on = [
-#    aws_s3_bucket_ownership_controls.video,
-##    aws_s3_bucket_public_access_block.video,
-#  ]
-#
-#  bucket = aws_s3_bucket.video.id
-#  acl    = "public-read"
-#}
-
 data "aws_iam_policy_document" "video" {
   statement {
     sid = "Read file"
