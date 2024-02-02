@@ -143,14 +143,44 @@ resource "aws_s3_bucket_versioning" "video" {
   }
 }
 
-resource "aws_s3_bucket_lifecycle_configuration" "example" {
+resource "aws_s3_bucket_lifecycle_configuration" "storage_class" {
   bucket = aws_s3_bucket.video.id
 
   rule {
-    id = "storage_class_change_for_images"
+    id = "storage_class_change_for_images_2022"
 
     filter {
-      prefix = "202*/"
+      prefix = "2022/"
+    }
+
+    transition {
+      days          = 30
+      storage_class = "GLACIER_IR"
+    }
+
+    status = "Enabled"
+  }
+
+  rule {
+    id = "storage_class_change_for_images_2023"
+
+    filter {
+      prefix = "2023/"
+    }
+
+    transition {
+      days          = 30
+      storage_class = "GLACIER_IR"
+    }
+
+    status = "Enabled"
+  }
+
+  rule {
+    id = "storage_class_change_for_images_2024"
+
+    filter {
+      prefix = "2024/"
     }
 
     transition {
