@@ -154,7 +154,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "storage_class" {
     }
 
     transition {
-      days          = 30
+      days          = 3
       storage_class = "GLACIER_IR"
     }
 
@@ -169,7 +169,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "storage_class" {
     }
 
     transition {
-      days          = 30
+      days          = 3
       storage_class = "GLACIER_IR"
     }
 
@@ -184,7 +184,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "storage_class" {
     }
 
     transition {
-      days          = 30
+      days          = 3
       storage_class = "GLACIER_IR"
     }
 
