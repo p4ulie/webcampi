@@ -49,7 +49,7 @@ def get_stream():
     return cv2.VideoCapture(args.stream)
 
 def upload_image(file_name, bucket, remote_file_name):
-    s3.meta.client.upload_file( file_name, bucket, remote_file_name)
+    s3.meta.client.upload_file( file_name, bucket, remote_file_name, ExtraArgs={"StorageClass": "GLACIER_IR"})
 
 def update_latest_image(bucket, remote_file_name):
     copy_source = {
