@@ -37,7 +37,7 @@ do
     cp "${LATEST_FILE}" "${DIR}/latest.jpg"
 
     echo "Uploading file ${LATEST_FILE}..."
-    /usr/local/bin/aws s3 cp "${DIR}/latest.jpg" s3://${S3_BUCKET} --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate
+    /usr/local/bin/aws s3 cp "${DIR}/latest.jpg" s3://${S3_BUCKET} --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --storage-class GLACIER_IR
 
     PREVIOUS_LATEST_FILE="${LATEST_FILE}"
   else
