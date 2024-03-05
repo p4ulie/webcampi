@@ -11,6 +11,30 @@ resource "aws_s3_bucket_versioning" "logs" {
 }
 
 data "aws_iam_policy_document" "logs" {
+
+  statement {
+    sid = "S3ServerAccessLogsPolicy"
+
+    principals {
+      type        = "Service"
+      identifiers = ["logging.s3.amazonaws.com"]
+    }
+
+    actions = [
+      "s3:PutObject",
+    ]
+
+    resources = [
+      "${aws_s3_bucket.logs.arn}/s3_access_log/*",
+    ]
+
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values   = ["${aws_s3_bucket.logs.arn}"]
+    }
+  }
+
   statement {
     sid = "AWSLogDeliveryWrite"
 
