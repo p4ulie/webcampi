@@ -27,7 +27,7 @@ resource "aws_cloudfront_distribution" "video" {
 #  aliases = ["mysite.example.com", "yoursite.example.com"]
 
   default_cache_behavior {
-    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    allowed_methods  = ["GET", "HEAD"]
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = aws_s3_bucket.video.id
 
