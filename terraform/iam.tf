@@ -3,7 +3,7 @@ data "aws_iam_policy_document" "assume_role" {
     effect = "Allow"
 
     principals {
-      type        = "Service"
+      type = "Service"
       identifiers = [
         "ec2.amazonaws.com",
         "lambda.amazonaws.com"
@@ -151,8 +151,8 @@ resource "aws_iam_role_policy_attachment" "lambda_invoke" {
 }
 
 resource "aws_lambda_permission" "allow_events_bridge_to_run_lambda" {
-  statement_id = "AllowExecutionFromCloudWatch"
-  action = "lambda:InvokeFunction"
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.convert_day.function_name
-  principal = "events.amazonaws.com"
+  principal     = "events.amazonaws.com"
 }

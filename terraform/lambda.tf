@@ -26,10 +26,10 @@ resource "aws_lambda_function" "convert_image_to_video" {
   source_code_hash = data.archive_file.convert_image_to_video.output_base64sha256
 
   runtime = "python3.12"
-  layers = [aws_lambda_layer_version.lambda_layer_ffmpeg.arn]
+  layers  = [aws_lambda_layer_version.lambda_layer_ffmpeg.arn]
 
   memory_size = 1536
-  timeout = 900
+  timeout     = 900
 
   ephemeral_storage {
     size = 10240 # Min 512 MB and the Max 10240 MB
@@ -54,10 +54,10 @@ resource "aws_lambda_function" "combine_videos" {
   source_code_hash = data.archive_file.combine_videos.output_base64sha256
 
   runtime = "python3.12"
-  layers = [aws_lambda_layer_version.lambda_layer_ffmpeg.arn]
+  layers  = [aws_lambda_layer_version.lambda_layer_ffmpeg.arn]
 
   memory_size = 1536
-  timeout = 900
+  timeout     = 900
 
   ephemeral_storage {
     size = 10240 # Min 512 MB and the Max 10240 MB
@@ -84,7 +84,7 @@ resource "aws_lambda_function" "convert_day" {
   runtime = "python3.12"
 
   memory_size = 256
-  timeout = 900
+  timeout     = 900
 
   ephemeral_storage {
     size = 512 # Min 512 MB and the Max 10240 MB
@@ -111,7 +111,7 @@ resource "aws_lambda_function" "generate_video_page" {
   runtime = "python3.12"
 
   memory_size = 256
-  timeout = 900
+  timeout     = 900
 
   ephemeral_storage {
     size = 512 # Min 512 MB and the Max 10240 MB
