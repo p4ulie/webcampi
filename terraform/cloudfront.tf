@@ -41,8 +41,8 @@ resource "aws_cloudfront_distribution" "video" {
 
     viewer_protocol_policy = "allow-all"
     min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
+    default_ttl            = 5
+    max_ttl                = 5
   }
 
 #  # Cache behavior with precedence 0

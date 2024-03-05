@@ -71,11 +71,11 @@ data "aws_iam_policy_document" "logs" {
   }
 
   statement {
-    sid = "CloudFrontogWrite"
+    sid = "CloudFrontLogWrite"
 
     principals {
       type        = "Service"
-      identifiers = ["cloudfront.logs.amazonaws.com"]
+      identifiers = ["cloudfront.amazonaws.com"]
     }
 
     actions = [
