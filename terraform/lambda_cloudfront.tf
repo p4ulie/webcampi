@@ -25,6 +25,8 @@ resource "aws_lambda_function" "lambda_basic_auth" {
   timeout     = 5
 }
 
-resource "aws_secretsmanager_secret" "lambda_basic_auth" {
-  name = "Lambda Basic Auth"
-}
+#resource "aws_secretsmanager_secret" "lambda_basic_auth" {
+#  provider = aws.aws_cloudfront_related  # Specify the provider alias for this resource
+#
+#  name = "lambda_basic_auth"
+#}

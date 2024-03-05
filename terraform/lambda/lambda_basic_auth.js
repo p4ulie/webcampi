@@ -5,9 +5,8 @@ exports.handler = (event, context, callback) => {
     const request = event.Records[0].cf.request;
     const headers = request.headers;
 
-    // Configure authentication
-    const authUser = 'user';
-    const authPass = 'pass';
+    const authUser = process.env.USERNAME;
+    const authPass = process.env.PASSWORD;
 
     // Construct the Basic Auth string
     const authString = 'Basic ' + new Buffer(authUser + ':' + authPass).toString('base64');
