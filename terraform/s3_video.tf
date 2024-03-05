@@ -45,69 +45,6 @@ data "aws_iam_policy_document" "video" {
     ]
   }
 
-  statement {
-    sid = "AWSLogDeliveryWrite"
-
-    principals {
-      type        = "Service"
-      identifiers = ["delivery.logs.amazonaws.com"]
-    }
-
-    actions = [
-      "s3:PutObject",
-    ]
-
-    resources = [
-      "${aws_s3_bucket.video.arn}/AWSLogs/${data.aws_caller_identity.current.account_id}/*",
-    ]
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SourceAccount"
-      values   = ["${data.aws_caller_identity.current.account_id}"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "s3:x-amz-acl"
-      values   = ["bucket-owner-full-control"]
-    }
-
-    condition {
-      test     = "ArnLike"
-      variable = "aws:SourceArn"
-      values   = ["arn:aws:logs:*:${data.aws_caller_identity.current.account_id}:*"]
-    }
-  }
-
-  statement {
-    sid = "AWSLogDeliveryAclCheck"
-
-    principals {
-      type        = "Service"
-      identifiers = ["delivery.logs.amazonaws.com"]
-    }
-
-    actions = [
-      "s3:GetBucketAcl",
-    ]
-
-    resources = [
-      "${aws_s3_bucket.video.arn}",
-    ]
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SourceAccount"
-      values   = ["${data.aws_caller_identity.current.account_id}"]
-    }
-
-    condition {
-      test     = "ArnLike"
-      variable = "aws:SourceArn"
-      values   = ["arn:aws:logs:*:${data.aws_caller_identity.current.account_id}:*"]
-    }
-  }
 }
 
 resource "aws_s3_bucket_policy" "video" {
@@ -160,4 +97,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "storage_class" {
 
     status = "Enabled"
   }
+}
+
+resource "aws_s3_bucket_logging" "video" {
+  bucket = aws_s3_bucket.video.id
+
+  target_bucket = aws_s3_bucket.logs.id
+  target_prefix = "s3_access_log/"
 }
