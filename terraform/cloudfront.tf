@@ -41,8 +41,14 @@ resource "aws_cloudfront_distribution" "video" {
 
     viewer_protocol_policy = "allow-all"
     min_ttl                = 0
-    default_ttl            = 86400
-    max_ttl                = 31536000
+    default_ttl            = 0
+    max_ttl                = 0
+
+    # Add Lambda@Edge function to the viewer request stage
+    lambda_function_association {
+      event_type   = "viewer-request"
+      lambda_arn   = aws_lambda_function.lambda_basic_auth.qualified_arn
+    }
   }
 
 #  # Cache behavior with precedence 0

@@ -156,3 +156,17 @@ resource "aws_lambda_permission" "allow_events_bridge_to_run_lambda" {
   function_name = aws_lambda_function.convert_day.function_name
   principal     = "events.amazonaws.com"
 }
+
+resource "aws_iam_role" "lambda_basic_auth" {
+  name               = "lambda_basic_auth"
+  description        = "Allows Lambda to AssumeRole"
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+
+  tags = var.aws_tags
+}
+
+#resource "aws_iam_role_policy_attachment" "lambda_basic_auth" {
+#  role = aws_iam_role.lambda_basic_auth.name
+#
+#  policy_arn = aws_iam_policy.video_bucket_full_access.arn
+#}
