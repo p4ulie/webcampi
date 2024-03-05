@@ -41,7 +41,7 @@ resource "aws_cloudfront_distribution" "video" {
 
     viewer_protocol_policy = "allow-all"
     min_ttl                = 0
-    default_ttl            = 5
+    default_ttl            = 0
     max_ttl                = 5
   }
 
