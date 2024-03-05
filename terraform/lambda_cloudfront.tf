@@ -24,3 +24,7 @@ resource "aws_lambda_function" "lambda_basic_auth" {
   memory_size = 128
   timeout     = 5
 }
+
+resource "aws_secretsmanager_secret" "lambda_basic_auth" {
+  name = "Lambda Basic Auth"
+}
