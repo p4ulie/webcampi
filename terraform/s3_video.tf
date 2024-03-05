@@ -147,36 +147,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "storage_class" {
   bucket = aws_s3_bucket.video.id
 
   rule {
-    id = "storage_class_change_for_images_2022"
-
-    filter {
-      prefix = "2022/"
-    }
-
-    transition {
-      days          = 3
-      storage_class = "GLACIER_IR"
-    }
-
-    status = "Enabled"
-  }
-
-  rule {
-    id = "storage_class_change_for_images_2023"
-
-    filter {
-      prefix = "2023/"
-    }
-
-    transition {
-      days          = 3
-      storage_class = "GLACIER_IR"
-    }
-
-    status = "Enabled"
-  }
-
-  rule {
     id = "storage_class_change_for_images_2024"
 
     filter {
