@@ -45,6 +45,30 @@ data "aws_iam_policy_document" "video" {
     ]
   }
 
+  statement {
+    sid = "CloudFront access"
+
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+
+    actions = [
+      "s3:GetObject",
+    ]
+
+    resources = [
+      "${aws_s3_bucket.video.arn}/*",
+    ]
+
+    condition {
+      test     = "StringLike"
+      variable = "aws:Referer"
+      values   = ["${aws_cloudfront_distribution.video.domain_name}"]
+    }
+
+  }
+
 }
 
 resource "aws_s3_bucket_policy" "video" {
